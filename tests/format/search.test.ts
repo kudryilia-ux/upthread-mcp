@@ -73,3 +73,14 @@ describe("formatSearchResults final-review fixes", () => {
     expect(out).toContain('"Is this mold on my wall?"');
   });
 });
+
+describe("formatSearchResults combines with web search", () => {
+  it("reminds Claude to also run its web search, on normal and thin results", () => {
+    const many = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post(), post({ id: "b" }), post({ id: "c" })]);
+    const few = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post()]);
+    const none = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, []);
+    for (const out of [many, few, none]) {
+      expect(out).toMatch(/Also run your web search on this question and combine both sources/);
+    }
+  });
+});

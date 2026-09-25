@@ -4,6 +4,10 @@ import { collapse, formatDate, formatRatio, formatScore, trimText } from "./comm
 const EXCERPT_CHARS = 200;
 const TOP_SUBREDDITS = 4;
 
+const COMBINE =
+  "Also run your web search on this question and combine both sources: Reddit shows people's experiences and " +
+  "opinions, the web adds facts, specs and expert reviews.";
+
 const TIPS =
   'Tips: read the relevant threads with read_reddit_threads. To refine, use short names, "X vs Y" or nicknames; ' +
   'if a name is ambiguous, add a brand or full model or OR the variants. Operators: title:, subreddit: (only in ' +
@@ -46,7 +50,7 @@ export function formatSearchResults(
   o: { sort: SearchSort; timeRange: TimeRange },
   posts: PostSummary[],
 ): string {
-  if (posts.length === 0) return `No results for "${query}".\n\n${HINTS}`;
+  if (posts.length === 0) return `No results for "${query}".\n\n${HINTS}\n\n${COMBINE}`;
   const time = o.timeRange === "all" ? "all time" : `past ${o.timeRange}`;
   const parts = [
     `Search "${query}" · ${o.sort} · ${time} · ${posts.length} results`,
@@ -54,6 +58,6 @@ export function formatSearchResults(
     "",
     posts.map(entry).join("\n"),
   ];
-  parts.push("", posts.length <= 2 ? `Few results. ${HINTS}` : TIPS);
+  parts.push("", posts.length <= 2 ? `Few results. ${HINTS}` : TIPS, "", COMBINE);
   return parts.join("\n");
 }

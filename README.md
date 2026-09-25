@@ -72,9 +72,9 @@ Mentioning "Reddit" in your question always works. Without it, Claude decides fo
 1. **Load tools at the start of a chat.** Click **+** (next to the message box) → **Connectors** → **Tool access** → **Tools already loaded**. Claude then knows about Upthread from your first message. Turn off connectors you don't need in that chat to keep it fast.
 2. **Install the Upthread skill** (one-time). Download [`upthread-skill.zip`](https://github.com/kudryilia-ux/upthread-mcp/raw/main/skill/upthread-skill.zip), then in claude.ai open **Customize → Skills** and upload the file (on older layouts: *Settings → Capabilities → Skills → Upload skill*). Skills need code execution turned on in your settings.
 3. **Add an instruction for Claude** (one-time). Click your initials (bottom left) → **Settings** → **General** → **Instructions for Claude** (called "personal preferences" on older layouts), and paste:
-   > For questions about how people experience or view something (products, media, places, advice, troubleshooting), also check Reddit with the Upthread tools and combine it with web search.
+   > For questions about how people experience or view something (products, media, places, advice, troubleshooting), also check Reddit with the Upthread tools. Whenever you use Reddit, also run a web search and combine both in your answer.
 
-Even with these, Claude sometimes skips Reddit when web search seems enough. If you want Reddit for sure, say so.
+Even with these, Claude sometimes skips Reddit when web search seems enough, or skips web search after using Reddit. If you want both for sure, say so, e.g. *"search the web and Reddit, then combine them"*.
 
 ## If something isn't working
 
