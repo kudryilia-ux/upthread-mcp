@@ -1,38 +1,32 @@
-import {
-  Client,
-  StreamableHTTPClientTransport,
-} from "@modelcontextprotocol/client";
+// Live smoke test: node scripts/test-client.mjs http://localhost:3000
+// Reads MCP_PATH_SECRET from env (run via: op run --env-file ~/.config/reddit-mcp/.env.op -- ...).
+import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 
-const origin =
-  process.argv.slice(2).find((argument) => argument !== "--") ||
-  "https://mcp-for-next-js.vercel.app";
+const base = process.argv.slice(2).find((a) => a !== "--") ?? "http://localhost:3000";
+const secret = process.env.MCP_PATH_SECRET;
+if (!secret) throw new Error("MCP_PATH_SECRET is not set");
 
-async function main() {
-  const client = new Client({
-    name: "mcp-for-next-js-example-client",
-    version: "1.0.0",
-  });
-  const endpoint = new URL("/mcp", `${origin}/`);
-  const transport = new StreamableHTTPClientTransport(endpoint);
+const text = (r) => r.content.map((c) => c.text ?? "").join("\n");
 
-  console.log("Connecting to", endpoint.toString());
-  await client.connect(transport);
+const client = new Client({ name: "upthread-smoke", version: "0.1.0" });
+await client.connect(new StreamableHTTPClientTransport(new URL(`/mcp/${secret}`, base)));
+console.log("Connected to", base, "(secret hidden)");
 
-  console.log("Connected", client.getServerCapabilities());
+const { tools } = await client.listTools();
+console.log("Tools:", tools.map((t) => t.name).join(", "));
 
-  const { tools } = await client.listTools();
-  console.log("Tools", tools);
+const search = await client.callTool({ name: "search_reddit", arguments: { query: 'XM5 OR "WH-1000XM5"', limit: 5 } });
+console.log("\n--- search_reddit ---\n" + text(search));
+if (search.isError) process.exit(1);
 
-  const result = await client.callTool({
-    name: "echo",
-    arguments: { message: "Hello from the MCP client" },
-  });
-  console.log("Result", result);
+const firstId = text(search).match(/^\d+\. \[([a-z0-9]+)\]/m)?.[1];
+const read = await client.callTool({ name: "read_threads", arguments: { threads: [firstId] } });
+console.log("\n--- read_threads ---\n" + text(read));
 
-  await client.close();
+const share = process.env.SHARE_LINK;
+if (share) {
+  const s = await client.callTool({ name: "read_threads", arguments: { threads: [share] } });
+  console.log("\n--- share link ---\n" + text(s).split("\n").slice(0, 3).join("\n"));
 }
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+await client.close();
+if (read.isError) process.exit(1);
