@@ -44,10 +44,9 @@ describe("search_reddit", () => {
     log.mockRestore();
   });
 
-  it("description carries the probe-grounded tips and stays neutral", () => {
-    expect(SEARCH_REDDIT_DESCRIPTION).toMatch(/ambiguous/i);
-    expect(SEARCH_REDDIT_DESCRIPTION).toMatch(/site:reddit\.com/);
-    expect(SEARCH_REDDIT_DESCRIPTION).toMatch(/subreddit:/);
+  it("description fits claude.ai's ~500-character limit, names the next tool, and stays neutral", () => {
+    expect(SEARCH_REDDIT_DESCRIPTION.length).toBeLessThanOrEqual(500);
+    expect(SEARCH_REDDIT_DESCRIPTION).toMatch(/read_reddit_threads/);
     expect(SEARCH_REDDIT_DESCRIPTION).not.toMatch(/consensus/i);
   });
 });

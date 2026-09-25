@@ -54,5 +54,7 @@ describe("read_threads", () => {
     expect(READ_THREADS_DESCRIPTION).toMatch(/web search/i);
     expect(READ_THREADS_DESCRIPTION).toMatch(/controversial/);
     expect(READ_THREADS_DESCRIPTION).not.toMatch(/consensus/i);
+    expect(READ_THREADS_DESCRIPTION.length).toBeLessThanOrEqual(500);
+    expect(READ_THREADS_DESCRIPTION).toMatch(/search_reddit_opinions_reviews/);
   });
 });

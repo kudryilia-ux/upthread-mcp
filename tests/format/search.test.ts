@@ -48,6 +48,20 @@ describe("formatSearchResults", () => {
     const many = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post(), post({ id: "b" }), post({ id: "c" })]);
     expect(many).not.toContain("Few results");
   });
+
+  it("ends normal results with the search tips (moved out of the tool description)", () => {
+    const out = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post(), post({ id: "b" }), post({ id: "c" })]);
+    const tips = out.slice(out.lastIndexOf("Tips:"));
+    expect(tips).toMatch(/read_reddit_threads/);
+    expect(tips).toMatch(/ambiguous/i);
+    expect(tips).toMatch(/site:reddit\.com/);
+    expect(tips).toMatch(/subreddit:/);
+    expect(tips.length).toBeLessThan(600);
+  });
+
+  it("points thin results at read_reddit_threads by its new name", () => {
+    expect(formatSearchResults("zzz", { sort: "relevance", timeRange: "all" }, [])).toContain("read_reddit_threads");
+  });
 });
 
 describe("formatSearchResults final-review fixes", () => {

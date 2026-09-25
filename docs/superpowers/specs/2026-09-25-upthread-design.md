@@ -58,7 +58,7 @@ The main client is claude.ai chat, using an authless custom connector. The serve
 claude.ai ──HTTPS──▶ /mcp/<secret>          access gate: 404 unless the secret matches
                           │
                           ▼
-                  MCP tools                  search_reddit, read_threads: shape Reddit data into text
+                  MCP tools                  search_reddit_opinions_reviews, read_reddit_threads: shape Reddit data into text
                           │
                           ▼
                   Reddit client              token, rate limit, HTTP; the only code that talks to Reddit
@@ -126,16 +126,18 @@ The Reddit client is the part most likely to change. Reddit has said third-party
 
 ## 6. Tools and output
 
+**Discoverability (added after live testing, 2026-09-25):** claude.ai loads connector tools lazily by default ("Load tools when needed"), so Claude sees only tool names until it decides to load them, and it ignores the MCP `instructions` field. Tool names therefore describe their use (`search_reddit_opinions_reviews`, `read_reddit_threads`), each description is at most 500 characters with the when-to-use wording first, and the search tips live in the search output rather than the description. The README documents the user-side options (Tools already loaded, a personal preference, a Project).
+
 Both tools return plain text only: no `outputSchema` and no `structuredContent`, to avoid sending the same data twice. Both are annotated `readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true`. The server's `instructions` field briefly says what Upthread is for and describes **two routes to finding threads**:
 
-1. **Reddit search** (`search_reddit`) matches posts, not comments.
-2. **Web search** (the client's own, for example claude.ai's): for specific details that may be buried in comments, or when Reddit search misses, search the web with `site:reddit.com` and pass the thread URLs to `read_threads`. Web search engines index comment text, so this route covers the missing comment search.
+1. **Reddit search** (`search_reddit_opinions_reviews`) matches posts, not comments.
+2. **Web search** (the client's own, for example claude.ai's): for specific details that may be buried in comments, or when Reddit search misses, search the web with `site:reddit.com` and pass the thread URLs to `read_reddit_threads`. Web search engines index comment text, so this route covers the missing comment search.
 
 Upthread doesn't run web searches itself. The client already has web search, and a server-side version would need a second paid API key (see §13).
 
 **Output never includes usernames.** It uses only `(OP)` for the original poster and `(mod)` for moderator-distinguished comments.
 
-### 6.1 `search_reddit`
+### 6.1 `search_reddit_opinions_reviews`
 
 | Parameter | Type | Default |
 |---|---|---|
@@ -168,9 +170,9 @@ By subreddit: r/SonyHeadphones 8 · r/headphones 2 · r/sony 1 · other 4
   - date (`YYYY-MM-DD`, UTC)
   - for self posts, the first ~200 characters of the body, on one line; for link posts, the link's domain
 - The "By subreddit" line lists the top 4 subreddits by count and groups the rest as "other N".
-- When there are 0–2 results, the output ends with hints: rephrase, add a word to disambiguate or `OR` the variants, widen the time range, or try web search with `site:reddit.com` and pass the links to `read_threads`.
+- When there are 0–2 results, the output ends with hints: rephrase, add a word to disambiguate or `OR` the variants, widen the time range, or try web search with `site:reddit.com` and pass the links to `read_reddit_threads`.
 
-### 6.2 `read_threads`
+### 6.2 `read_reddit_threads`
 
 | Parameter | Type | Default |
 |---|---|---|
@@ -224,7 +226,7 @@ Descriptions are neutral: they say what the tool returns and never mention conse
 - Look for FAQ, megathread and "discussion" threads, which often hold the best answers.
 - Read only threads clearly relevant to the question, and rephrase rather than read marginal ones.
 - Use `comment_sort: controversial` when the range of views matters. It returns top-level comments only.
-- Reddit links from web search can go straight into `read_threads`. Web search is the route for details buried in comments.
+- Reddit links from web search can go straight into `read_reddit_threads`. Web search is the route for details buried in comments.
 - A `subreddit:` search is only an addition to a general search, never a replacement.
 
 ## 7. Errors
@@ -282,7 +284,7 @@ The work is test-driven. **Vitest** is added as a dev dependency, and `pnpm test
 - **Access gate / route:**
   - wrong secret, missing environment variable or short secret → 404
   - a request to `/.well-known/oauth-protected-resource` is never a 401
-  - the right secret → MCP `initialize` succeeds and `tools/list` returns exactly `search_reddit` and `read_threads`
+  - the right secret → MCP `initialize` succeeds and `tools/list` returns exactly `search_reddit_opinions_reviews` and `read_reddit_threads`
 
 **Fixtures are synthetic.** They copy the structure of real API responses but use invented text and usernames. No real Reddit content is committed.
 
@@ -297,7 +299,7 @@ The work is test-driven. **Vitest** is added as a dev dependency, and `pnpm test
    - a product ("how do XM5s hold up long-term")
    - a movie ("what does the Tenet opera scene mean")
    - general advice
-   - a detail likely buried in comments (for example "do XM5 hinges crack"). Check that Claude uses web search and then `read_threads`
+   - a detail likely buried in comments (for example "do XM5 hinges crack"). Check that Claude uses web search and then `read_reddit_threads`
 
    The results decide how to tune the output limits and description tips.
 
@@ -328,7 +330,7 @@ The README is the product page on GitHub, so it has to work for a stranger who h
    3. In claude.ai: Settings → Connectors → Add custom connector → paste `https://<your-app>.vercel.app/mcp/<secret>`.
    4. Ask a test question.
 5. **Configuration reference.** A table of the four variables: what each is, where to find it, and an example value (the User-Agent format `<platform>:<app id>:<version> (by /u/<username>)` included).
-6. **Using it well.** How to ask questions that make good use of Reddit, and the fact that Claude can pass Reddit links from its web search to `read_threads`.
+6. **Using it well.** How to ask questions that make good use of Reddit, and the fact that Claude can pass Reddit links from its web search to `read_reddit_threads`.
 7. **Tools reference.** Parameters for both tools and a short example output (invented content).
 8. **Security model.** The secret URL, why every other path returns 404, how to rotate the secret, and what a leaked secret would allow (someone using your rate limit, nothing more).
 9. **Other clients.** Claude Desktop and Claude Code config snippets, using the same URL.

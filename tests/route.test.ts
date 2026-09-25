@@ -36,13 +36,14 @@ describe("gated MCP route", () => {
     const client = new Client({ name: "route-test", version: "0.0.0" });
     await client.connect(transport);
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["read_threads", "search_reddit"]);
+    expect(tools.map((t) => t.name).sort()).toEqual(["read_reddit_threads", "search_reddit_opinions_reviews"]);
+    for (const t of tools) expect(t.title ?? t.annotations?.title).toMatch(/Reddit/);
     expect(tools.every((t) => t.annotations?.readOnlyHint === true)).toBe(true);
     expect(client.getInstructions()).toMatch(/site:reddit\.com/);
 
     // Without Reddit credentials the tool reports the credentials message instead of crashing.
     vi.spyOn(console, "error").mockImplementation(() => {});
-    const result = await client.callTool({ name: "search_reddit", arguments: { query: "XM5" } });
+    const result = await client.callTool({ name: "search_reddit_opinions_reviews", arguments: { query: "XM5" } });
     expect(result.isError).toBe(true);
     expect(JSON.stringify(result.content)).toContain("rejected the app credentials");
     await client.close();

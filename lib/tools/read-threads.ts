@@ -7,11 +7,9 @@ import { resolveThreadRef } from "../reddit/refs";
 import { formatThread } from "../format/thread";
 import { errorResult, textResult } from "./result";
 
-export const READ_THREADS_DESCRIPTION = `Read up to 5 Reddit threads: each post plus a bounded set of its comments and replies (20 top-level comments, up to 3 levels deep, long text trimmed), with scores, dates and (OP)/(mod) markers. Use it on post IDs from search_reddit, and on any Reddit links your web search finds, since Reddit pages usually can't be opened directly. The comments are where most of the experiences and answers are.
+export const READ_THREADS_DESCRIPTION = `Read up to 5 Reddit threads: the post plus its top comments and replies, with scores, dates and (OP) markers. Use it on post IDs from search_reddit_opinions_reviews and on any Reddit link your web search finds, since Reddit pages usually can't be opened directly. The comments hold most of the experiences and answers.
 
-Accepts post IDs from search_reddit, or Reddit URLs in any common form (reddit.com, old/new/np/m.reddit.com, redd.it, share links, comment permalinks), including Reddit links found with your web search.
-comment_sort: best (default) for the most useful comments; top for the highest scored; controversial when the range of views matters (returns top-level comments only); new for recent replies; qa for Q&A-style threads.
-If one thread fails, the others are still returned.`;
+comment_sort: best (default), top, controversial (range of views; top-level only), new, qa.`;
 
 export const readThreadsInput = z
   .object({
@@ -57,9 +55,9 @@ function errorText(err: unknown): string {
 
 export function registerReadThreads(server: McpServer, getClient: () => RedditClient) {
   server.registerTool(
-    "read_threads",
+    "read_reddit_threads",
     {
-      title: "Read Reddit threads",
+      title: "Read Reddit threads and comments",
       description: READ_THREADS_DESCRIPTION,
       inputSchema: readThreadsInput,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
