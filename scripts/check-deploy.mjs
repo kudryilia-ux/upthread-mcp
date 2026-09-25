@@ -26,7 +26,7 @@ try {
   await client.connect(new StreamableHTTPClientTransport(new URL(`/mcp/${secret}`, base)));
   const { tools } = await client.listTools();
   const names = tools.map((t) => t.name).sort().join(",");
-  const ok = names === "read_threads,search_reddit";
+  const ok = names === "read_reddit_threads,search_reddit_opinions_reviews";
   if (!ok) failed = true;
   console.log(`${ok ? "ok  " : "FAIL"} handshake with secret -> tools: ${names}`);
   await client.close();

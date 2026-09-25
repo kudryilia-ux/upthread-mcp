@@ -4,12 +4,18 @@ import { collapse, formatDate, formatRatio, formatScore, trimText } from "./comm
 const EXCERPT_CHARS = 200;
 const TOP_SUBREDDITS = 4;
 
+const TIPS =
+  'Tips: read the relevant threads with read_reddit_threads. To refine, use short names, "X vs Y" or nicknames; ' +
+  'if a name is ambiguous, add a brand or full model or OR the variants. Operators: title:, subreddit: (only in ' +
+  "addition to a general search), OR, NOT; exact quotes are unreliable. FAQ and megathreads often answer best. " +
+  "Search matches posts, not comments: for details in comments, web-search site:reddit.com and read those links.";
+
 const HINTS = [
   "Next steps:",
   '- Rephrase the way Redditors title posts: short names, "X vs Y", nicknames.',
   "- If a name is ambiguous, add a distinguishing word (brand, full model) or OR the variants.",
   "- Widen time_range.",
-  "- Use web search with site:reddit.com and pass thread URLs to read_threads.",
+  "- Use web search with site:reddit.com and pass thread URLs to read_reddit_threads.",
 ].join("\n");
 
 function subredditLine(posts: PostSummary[]): string {
@@ -48,6 +54,6 @@ export function formatSearchResults(
     "",
     posts.map(entry).join("\n"),
   ];
-  if (posts.length <= 2) parts.push("", `Few results. ${HINTS}`);
+  parts.push("", posts.length <= 2 ? `Few results. ${HINTS}` : TIPS);
   return parts.join("\n");
 }

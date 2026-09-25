@@ -26,7 +26,7 @@ It is read-only, stores nothing, and uses Reddit's official Data API.
    openssl rand -base64 32 | tr '+/' '-_' | tr -d '='
    ```
 
-3. **Connect Claude.** In claude.ai: *Settings → Connectors → Add custom connector*, and paste:
+3. **Connect Claude.** In claude.ai: *Settings → Connectors → Add custom connector*. Name it **`Upthread - Reddit opinions & reviews`** (the name helps Claude recognize when to use it) and paste:
 
    ```
    https://<your-app>.vercel.app/mcp/<MCP_PATH_SECRET>
@@ -43,15 +43,25 @@ It is read-only, stores nothing, and uses Reddit's official Data API.
 | `REDDIT_CLIENT_SECRET` | Your Reddit app's secret | Same page, "secret" |
 | `REDDIT_USER_AGENT` | Identifies your app to Reddit, required by Reddit's rules | Format: `<platform>:<app id>:<version> (by /u/<your username>)`, e.g. `web:upthread:0.1.0 (by /u/example)` |
 
+## Getting Claude to use it without asking
+
+By default, claude.ai keeps connectors "on standby": Claude sees only a connector's name and tool names until it decides to load them. Upthread's names and descriptions are written to make Claude reach for it on opinion and experience questions, but in the default mode Claude sometimes answers from web search alone. Saying "check Reddit" always works. To make it automatic, pick any of these (most reliable first):
+
+1. **Load tools upfront.** In a chat, click **+ → Connectors → Tool access → Tools already loaded**. Claude then sees Upthread's full descriptions from the first message and uses Reddit on its own for these questions. (Loading all connectors uses more of the chat's context, so turn off connectors you don't need in that chat.)
+2. **Add a personal preference.** *Settings → Profile → personal preferences*, add:
+   > For questions about how people experience or view something (products, media, places, advice, troubleshooting), also check Reddit with the Upthread tools and combine it with web search.
+3. **Use a Project.** Put the same sentence in a Project's instructions and ask your questions there.
+4. **Name the connector descriptively** (as in the quick start). The name is part of what Claude sees in the default mode.
+
 ## Using it well
 
 - Ask naturally. Claude decides when Reddit helps and combines it with web search.
-- Reddit search matches **posts, not comments**. For details buried in comments, Claude uses its web search with `site:reddit.com` and reads the threads it finds with `read_threads`.
+- Reddit search matches **posts, not comments**. For details buried in comments, Claude uses its web search with `site:reddit.com` and reads the threads it finds with `read_reddit_threads`.
 - Ask for the range of opinions ("what are the different views…") and Claude can sort comments by *controversial*.
 
 ## Tools
 
-**`search_reddit`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `top` · `new` · `comments`), `time_range` (`hour` … `all`), `limit` (1–25, default 15).
+**`search_reddit_opinions_reviews`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `top` · `new` · `comments`), `time_range` (`hour` … `all`), `limit` (1–25, default 15).
 
 ```
 Search "XM5 OR "WH-1000XM5"" · relevance · all time · 15 results
@@ -62,7 +72,7 @@ By subreddit: r/SonyHeadphones 8 · r/headphones 2 · r/sony 1 · other 4
    "I have used both daily for half a year. Comfort goes to the QC, but…"
 ```
 
-**`read_threads`**: `threads` (1–5 post IDs or Reddit URLs), `comment_sort` (`best` · `top` · `controversial` · `new` · `qa`).
+**`read_reddit_threads`**: `threads` (1–5 post IDs or Reddit URLs), `comment_sort` (`best` · `top` · `controversial` · `new` · `qa`).
 
 ```
 === [1abc2de] XM5 vs QC Ultra after six months
@@ -111,6 +121,7 @@ Tip: to keep secrets out of files and shell history, store them in a password ma
 ## Troubleshooting
 
 - **Connector shows no tools / fails to connect:** check the URL ends in `/mcp/<your secret>` and that `MCP_PATH_SECRET` in Vercel matches (redeploy after changing env vars).
+- **Claude answers without checking Reddit:** see [Getting Claude to use it without asking](#getting-claude-to-use-it-without-asking), or just add "check Reddit" to your question.
 - **"Reddit rejected the app credentials":** check the client ID, secret and user agent, and that your app is still registered and approved.
 - **"Reddit rate limit reached":** the limit is about 100 requests per minute per app. Wait for the reset shown.
 - **"Couldn't resolve share link":** open the link in a browser and paste the full `reddit.com/r/…/comments/…` URL instead.
