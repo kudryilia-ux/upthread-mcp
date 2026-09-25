@@ -45,13 +45,16 @@ It is read-only, stores nothing, and uses Reddit's official Data API.
 
 ## Getting Claude to use it without asking
 
-By default, claude.ai keeps connectors "on standby": Claude sees only a connector's name and tool names until it decides to load them. Upthread's names and descriptions are written to make Claude reach for it on opinion and experience questions, but in the default mode Claude sometimes answers from web search alone. Saying "check Reddit" always works. To make it automatic, pick any of these (most reliable first):
+By default, claude.ai keeps connectors "on standby": Claude sees only a connector's name and tool names until it decides to load them. Upthread's names and descriptions are written to make Claude reach for it on opinion and experience questions, but in the default mode Claude sometimes answers from web search alone. Saying "check Reddit" always works. Even when the tools are loaded, whether to use them is Claude's call in each chat, so expect it to skip Reddit sometimes when web search seems enough. To make it more automatic, pick any of these (most reliable first):
 
 1. **Load tools upfront.** In a chat, click **+ → Connectors → Tool access → Tools already loaded**. Claude then sees Upthread's full descriptions from the first message and uses Reddit on its own for these questions. (Loading all connectors uses more of the chat's context, so turn off connectors you don't need in that chat.)
-2. **Add a personal preference.** *Settings → Profile → personal preferences*, add:
+2. **Install the Upthread skill** (one-time, optional). Claude sees installed skills in every chat and picks them by topic, so the skill can bring in Upthread even in the default mode. Requires code execution to be enabled.
+   1. Download the [`skill/upthread`](skill/upthread) folder and zip it: `cd skill && zip -r upthread-skill.zip upthread`
+   2. In claude.ai: *Settings → Capabilities → Skills → Upload skill*, and choose `upthread-skill.zip`.
+3. **Add a personal preference.** *Settings → Profile → personal preferences*, add:
    > For questions about how people experience or view something (products, media, places, advice, troubleshooting), also check Reddit with the Upthread tools and combine it with web search.
-3. **Use a Project.** Put the same sentence in a Project's instructions and ask your questions there.
-4. **Name the connector descriptively** (as in the quick start). The name is part of what Claude sees in the default mode.
+4. **Use a Project.** Put the same sentence in a Project's instructions and ask your questions there.
+5. **Name the connector descriptively** (as in the quick start). The name is part of what Claude sees in the default mode.
 
 ## Using it well
 
