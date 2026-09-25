@@ -131,7 +131,7 @@ Both tools return plain text only: no `outputSchema` and no `structuredContent`,
 1. **Reddit search** (`search_reddit`) matches posts, not comments.
 2. **Web search** (the client's own, for example claude.ai's): for specific details that may be buried in comments, or when Reddit search misses, search the web with `site:reddit.com` and pass the thread URLs to `read_threads`. Web search engines index comment text, so this route covers the missing comment search.
 
-Upthread doesn't run web searches itself. The client already has web search, and a server-side version would need a second paid API key (see §12).
+Upthread doesn't run web searches itself. The client already has web search, and a server-side version would need a second paid API key (see §13).
 
 **Output never includes usernames.** It uses only `(OP)` for the original poster and `(mod)` for moderator-distinguished comments.
 
@@ -337,7 +337,7 @@ The README is the product page on GitHub, so it has to work for a stranger who h
 
 **Deploy button:** `https://vercel.com/new/clone?repository-url=<repo>&env=MCP_PATH_SECRET,REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET,REDDIT_USER_AGENT&envDescription=…&envLink=<README anchor>`. The exact parameters are confirmed against Vercel's docs during implementation.
 
-**Repo metadata:** a description matching the pitch; topics `mcp`, `mcp-server`, `model-context-protocol`, `claude`, `reddit`, `nextjs`, `vercel`.
+**Repo metadata:** a description matching the pitch; topics as listed in §12.1.
 
 ## 11. Rollout
 
@@ -348,7 +348,46 @@ The README is the product page on GitHub, so it has to work for a stranger who h
 4. The owner runs `check-deploy.mjs`, then updates the claude.ai connector URL to `https://<host>/mcp/<secret>`.
 5. Try the three kinds of question in claude.ai, and tune the limits and tips if needed.
 
-## 12. Future options (not in v1)
+## 12. Launch
+
+The launch happens after rollout (§11), once the owner has used Upthread in claude.ai for a while and the README demo shows real behavior. Venue rules were researched on 2026-09-25 from primary sources and archived rule pages. Recheck each venue's rules on the day you post.
+
+**Positioning (decided):** "for people who have Reddit API access". Every listing and post says in its first two lines that users need their own approved Reddit API app, because new keys have needed Reddit's approval since November 2025. Never say "one-click" or "free Reddit access". The name is always "Upthread for Reddit". Use is personal and non-commercial.
+
+**Posts are written by the owner.** r/mcp and r/opensource ban AI-generated posts, and the others penalize them. Claude can suggest angles and check facts, but each post is the owner's own words, with a different angle for each venue. Never ask anyone to upvote.
+
+### 12.1 Before announcing (repo work, in the implementation plan)
+
+- README per §10, with a 10–20 second demo GIF, and GitHub topics: `mcp`, `mcp-server`, `model-context-protocol`, `claude`, `claude-ai`, `reddit`, `reddit-api`, `remote-mcp`, `nextjs`, `vercel`, `streamable-http`.
+- **Deploy button:** URL format per Vercel's docs (updated 2026-07-15), using `env=MCP_PATH_SECRET,REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET,REDDIT_USER_AGENT` plus `envDescription` and an `envLink` that points to the README's configuration section. Verify the exact base path (`vercel.com/new/clone` or `vercel.com/clone`) during implementation.
+- **`server.json` for the official MCP registry**, using the `remotes` field with a URL template (`https://{deployment_host}/mcp/{secret}`, with `secret` marked `isSecret`). The owner publishes it with `mcp-publisher` under `io.github.<user>/upthread`. Placeholders in the hostname are untested, so check them with the publisher's validation first.
+- **`glama.json`** listing the owner as maintainer. Glama builds the server to score it, so it must start without Reddit credentials. It already does: the gate fails closed and the tools report missing credentials. Add a Dockerfile if Glama needs one.
+
+### 12.2 Directories
+
+| Venue | Action | Notes |
+|---|---|---|
+| Official MCP Registry | Publish `server.json` | Other directories copy from it (PulseMCP picks it up automatically). Publish here first |
+| Glama | Add the repo and claim it | The awesome-mcp-servers PR bot checks for the Glama badge |
+| punkpeye/awesome-mcp-servers | PR: one alphabetical line, 📇 ☁️, "Social Media" or "Search & Data Extraction" section | After Glama |
+| mcpservers.org | Free submission (~2-week review) | Week 2 |
+| Skip | modelcontextprotocol/servers (list retired), awesome-remote-mcp-servers (excludes per-user URLs), Smithery (expects one hosted endpoint), Product Hunt | |
+
+### 12.3 Community posts, in order
+
+1. **Day 1: r/mcp** with the **Showcase** tag. Disclose that you built it.
+2. **Day 1–2: r/ClaudeAI** under Rule 7: built by you with Claude, say how Claude helped, free, little promotional language, flair required. **This needs more than 50 karma on the posting account.**
+3. **Days 2–3: r/ClaudeCode**, covering what it does, who it's for, cost (free, bring your own key) and your relationship to it, with flair. Then **r/modelcontextprotocol**. Each post takes a different angle; none is a crosspost.
+4. **Week 1:** **Show HN**, posted on a weekday morning (US time), leading with the demo and stating the key requirement openly, since HN dislikes barriers to trying things. Also a **dev.to write-up** (e.g. "Giving Claude a Reddit source with a remote MCP on Vercel") and posts on X and Bluesky (#MCP, #ClaudeAI).
+5. **Week 2:**
+   - r/opensource with the **Promotional** flair
+   - the r/selfhosted **New Project Megathread** (projects under 3 months old can only post there)
+   - the r/nextjs weekly **Show and Tell** thread
+6. **Optional: r/redditdev,** only as a technical "lessons from building on the Data API" post, never a pitch.
+
+**Don't promote in:** the MCP Contributor Discord and GitHub Discussions (their guidelines exclude product marketing), or the Claude Discord before checking its rules channel. r/LocalLLaMA and r/ChatGPTCoding are poor fits and have strict promotion rules.
+
+## 13. Future options (not in v1)
 
 - An optional *additional* targeted search whose results appear alongside the general search, never in place of it.
 - A community-lookup tool for niche topics.
