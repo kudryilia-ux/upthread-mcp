@@ -1,137 +1,134 @@
 # Upthread for Reddit
 
-**Let Claude search Reddit and read the threads, alongside its web search.**
+**Let Claude read Reddit for you.** Ask Claude something like *"How do Sony XM5 headphones hold up after a year?"* or *"What does the ending of Tenet mean?"* and it can search Reddit, read the threads, and tell you what real people say, alongside its normal web search.
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Node](https://img.shields.io/badge/node-%E2%89%A520-339933) ![MCP](https://img.shields.io/badge/MCP-server-6b4fbb)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![MCP](https://img.shields.io/badge/MCP-server-6b4fbb)
 
-Upthread is a small, self-hosted [MCP](https://modelcontextprotocol.io) server. Add it to Claude as a connector and Claude can:
+- **Read-only.** It never posts, votes or messages, and it stores nothing.
+- **Private to you.** You run your own copy, and only you have its address.
+- **Free to run** on a free Vercel account, for personal use.
 
-- **search Reddit posts** across all of Reddit, with scores, comment counts, dates and subreddits
-- **read threads**: the post plus its top comments and replies, from IDs or any Reddit link (including links Claude finds with web search)
-- **weigh what people say**, including disagreement, using upvotes, dates and where it was said
+## What you need
 
-It is read-only, stores nothing, and uses Reddit's official Data API.
+- **A Claude account** that can add custom connectors (claude.ai → *Settings → Connectors*).
+- **A Reddit API app** with its *client ID* and *secret*. If you've made one before, find it at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps). If you haven't, you'll need to [request access from Reddit](https://support.reddithelp.com/hc/en-us/articles/42728983564564). Since November 2025 new apps need Reddit's approval, and that can take a while. Existing apps should be registered at [developers.reddit.com/app-registration](https://developers.reddit.com/app-registration).
+- **A free [GitHub](https://github.com/signup) account and a free [Vercel](https://vercel.com/signup) account.** Vercel is the service that runs your copy; you can sign up for it with GitHub.
 
-> **Before you start: you need your own Reddit API app.** Reddit closed self-service API keys in November 2025; new keys require Reddit's approval ([Responsible Builder Policy](https://support.reddithelp.com/hc/en-us/articles/42728983564564)). If you already have an app, register it at [developers.reddit.com/app-registration](https://developers.reddit.com/app-registration). Use is personal and non-commercial, and Reddit content must not be used to train models.
+Setup takes about 10 minutes and needs no coding.
 
-## Quick start (about 10 minutes)
+## Setup
 
-1. **Deploy.** Click the button and fill in the four variables (see [Configuration](#configuration)):
+### 1. Collect your Reddit details
+Go to [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps) and find your app. Copy these into a note:
+- **Client ID**: the short code under the app's name
+- **Secret**: next to the word "secret"
+- **Your Reddit username**
 
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fkudryilia-ux%2Fupthread-mcp&env=MCP_PATH_SECRET,REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET,REDDIT_USER_AGENT&envDescription=Secret%20URL%20path%20plus%20your%20Reddit%20app%20credentials&envLink=https%3A%2F%2Fgithub.com%2Fkudryilia-ux%2Fupthread-mcp%23configuration&project-name=upthread-mcp&repository-name=upthread-mcp)
+### 2. Make a private password for your connector
+This becomes part of your connector's address, so only you can use it. Use a password generator (for example in 1Password, Bitwarden or your browser) and create a password that is:
+- **at least 32 characters long**
+- **letters and numbers only**, with no symbols
 
-2. **Generate the URL secret** for `MCP_PATH_SECRET`:
+Save it somewhere safe. You'll need it in steps 3 and 5.
 
-   ```sh
-   openssl rand -base64 32 | tr '+/' '-_' | tr -d '='
-   ```
+### 3. Create your copy on Vercel
+Click this button:
 
-3. **Connect Claude.** In claude.ai: *Settings → Connectors → Add custom connector*. Name it **`Upthread - Reddit opinions & reviews`** (the name helps Claude recognize when to use it) and paste:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fkudryilia-ux%2Fupthread-mcp&env=MCP_PATH_SECRET,REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET,REDDIT_USER_AGENT&envDescription=Your%20connector%20password%20and%20Reddit%20app%20details&envLink=https%3A%2F%2Fgithub.com%2Fkudryilia-ux%2Fupthread-mcp%23setup&project-name=upthread-mcp&repository-name=upthread-mcp)
 
-   ```
-   https://<your-app>.vercel.app/mcp/<MCP_PATH_SECRET>
-   ```
+Sign in with GitHub when asked. Vercel will ask for four values:
 
-4. **Ask something**, e.g. *"What do people on Reddit say about how the Sony XM5 holds up after a year?"*
+| Box | What to enter |
+|---|---|
+| `MCP_PATH_SECRET` | The password from step 2 |
+| `REDDIT_CLIENT_ID` | Your Reddit client ID |
+| `REDDIT_CLIENT_SECRET` | Your Reddit secret |
+| `REDDIT_USER_AGENT` | `web:upthread:1.0 (by /u/YOUR_REDDIT_USERNAME)`, with your username in place of `YOUR_REDDIT_USERNAME` |
 
-## Configuration
+Click **Deploy** and wait about a minute. When it's done, Vercel shows your app's address, something like `https://upthread-mcp-abc123.vercel.app`. Copy it.
 
-| Variable | What it is | Where to get it |
-|---|---|---|
-| `MCP_PATH_SECRET` | Random secret (32+ characters) that forms your private URL | Generate with the command above |
-| `REDDIT_CLIENT_ID` | Your Reddit app's client ID | [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps), under the app name |
-| `REDDIT_CLIENT_SECRET` | Your Reddit app's secret | Same page, "secret" |
-| `REDDIT_USER_AGENT` | Identifies your app to Reddit, required by Reddit's rules | Format: `<platform>:<app id>:<version> (by /u/<your username>)`, e.g. `web:upthread:0.1.0 (by /u/example)` |
+### 4. Build your connector address
+Join your app's address, then `/mcp/`, then your password from step 2:
 
-## Getting Claude to use it without asking
+```
+https://upthread-mcp-abc123.vercel.app/mcp/YOUR_PASSWORD
+```
 
-By default, claude.ai keeps connectors "on standby": Claude sees only a connector's name and tool names until it decides to load them. Upthread's names and descriptions are written to make Claude reach for it on opinion and experience questions, but in the default mode Claude sometimes answers from web search alone. Saying "check Reddit" always works. Even when the tools are loaded, whether to use them is Claude's call in each chat, so expect it to skip Reddit sometimes when web search seems enough. To make it more automatic, pick any of these (most reliable first):
+There's no slash at the end. Keep this address private; anyone who has it can use your connector.
 
-1. **Load tools upfront.** In a chat, click **+ → Connectors → Tool access → Tools already loaded**. Claude then sees Upthread's full descriptions from the first message and uses Reddit on its own for these questions. (Loading all connectors uses more of the chat's context, so turn off connectors you don't need in that chat.)
-2. **Install the Upthread skill** (one-time, optional). Claude sees installed skills in every chat and picks them by topic, so the skill can bring in Upthread even in the default mode. Requires code execution to be enabled.
-   1. Download the [`skill/upthread`](skill/upthread) folder and zip it: `cd skill && zip -r upthread-skill.zip upthread`
-   2. In claude.ai: *Settings → Capabilities → Skills → Upload skill*, and choose `upthread-skill.zip`.
-3. **Add a personal preference.** *Settings → Profile → personal preferences*, add:
+### 5. Add it to Claude
+1. In [claude.ai](https://claude.ai), click your name (bottom left) → **Settings** → **Connectors** → **Add custom connector**.
+2. **Name:** `Upthread - Reddit opinions & reviews`
+3. **URL:** your connector address from step 4
+4. Click **Add**. You should see two tools listed: `search_reddit_opinions_reviews` and `read_reddit_threads`.
+
+### 6. Try it
+Start a new chat and ask: *"Search Reddit for how Sony XM5 headphones hold up after a year."* Claude should show Reddit search steps and then answer using what people said.
+
+## Getting Claude to use Reddit on its own
+
+Mentioning "Reddit" in your question always works. Without it, Claude decides for itself whether to check Reddit, and by default it often doesn't, because it keeps connectors on standby until a question clearly calls for them. Any of these makes it more automatic (most reliable first):
+
+1. **Load tools at the start of a chat.** Click **+** (next to the message box) → **Connectors** → **Tool access** → **Tools already loaded**. Claude then knows about Upthread from your first message. Turn off connectors you don't need in that chat to keep it fast.
+2. **Install the Upthread skill** (one-time). Download [`upthread-skill.zip`](https://github.com/kudryilia-ux/upthread-mcp/raw/main/skill/upthread-skill.zip), then in claude.ai go to *Settings → Capabilities*, turn on **Code execution**, and under **Skills** click **Upload skill** and choose the file.
+3. **Add a personal preference** (one-time). In *Settings → Profile*, under personal preferences, paste:
    > For questions about how people experience or view something (products, media, places, advice, troubleshooting), also check Reddit with the Upthread tools and combine it with web search.
-4. **Use a Project.** Put the same sentence in a Project's instructions and ask your questions there.
-5. **Name the connector descriptively** (as in the quick start). The name is part of what Claude sees in the default mode.
 
-## Using it well
+Even with these, Claude sometimes skips Reddit when web search seems enough. If you want Reddit for sure, say so.
 
-- Ask naturally. Claude decides when Reddit helps and combines it with web search.
-- Reddit search matches **posts, not comments**. For details buried in comments, Claude uses its web search with `site:reddit.com` and reads the threads it finds with `read_reddit_threads`.
-- Ask for the range of opinions ("what are the different views…") and Claude can sort comments by *controversial*.
+## If something isn't working
 
-## Tools
+- **Claude says it can't connect, or shows no tools:** check the connector address. It must be your Vercel address + `/mcp/` + your exact password, with no slash at the end. If you changed the password in Vercel, redeploy (Vercel → your project → **Deployments** → **⋯** → **Redeploy**) and update the address in Claude.
+- **"Reddit rejected the app credentials":** re-check your client ID, secret and user agent in Vercel (*your project → Settings → Environment Variables*), then redeploy. Also make sure your Reddit app is still active and registered.
+- **"Reddit rate limit reached":** Reddit allows about 100 requests a minute. Wait a minute and try again.
+- **"Couldn't resolve share link":** open the link in your browser and give Claude the full `reddit.com/r/…/comments/…` address instead.
+- **Claude answered without checking Reddit:** see [Getting Claude to use Reddit on its own](#getting-claude-to-use-reddit-on-its-own), or add "check Reddit" to your question.
 
-**`search_reddit_opinions_reviews`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `top` · `new` · `comments`), `time_range` (`hour` … `all`), `limit` (1–25, default 15).
+## Privacy and safety
 
-```
-Search "XM5 OR "WH-1000XM5"" · relevance · all time · 15 results
-By subreddit: r/SonyHeadphones 8 · r/headphones 2 · r/sony 1 · other 4
+- Your copy runs in your own Vercel account. It only answers at your private address, and every other address returns "not found".
+- It reads public Reddit posts and comments when Claude asks. It keeps nothing, and it never sees your Claude conversations beyond the searches Claude sends it.
+- If you think your address leaked, change `MCP_PATH_SECRET` in Vercel, redeploy, and update the address in Claude. The old address stops working immediately.
 
-1. [1abc2de] XM5 vs QC Ultra after six months
-   r/headphones · Review · 1.2k points (96%) · 340 comments · 2025-03-14
-   "I have used both daily for half a year. Comfort goes to the QC, but…"
-```
+## Reddit's rules
 
-**`read_reddit_threads`**: `threads` (1–5 post IDs or Reddit URLs), `comment_sort` (`best` · `top` · `controversial` · `new` · `qa`).
+Upthread for Reddit is not affiliated with or endorsed by Reddit, Inc. It uses Reddit's official API with your own app, so Reddit's [Data API Terms](https://www.redditinc.com/policies/data-api-terms) apply to you: **personal, non-commercial use only**, no training AI models on Reddit content, and no storing content.
 
-```
-=== [1abc2de] XM5 vs QC Ultra after six months
-r/headphones · 1.2k points (96%) · 340 comments · 2025-03-14 · https://reddit.com/comments/1abc2de
-Post (OP): I have used both daily for half a year…
+<details>
+<summary><strong>For developers</strong></summary>
 
-Comments (best · 20 shown of 340):
-[▲2.3k] The ANC gap closed after the spring firmware update. [2025-03-14]
-  ↳ [▲812] (OP) Fair, I'm on the latest firmware and still notice it.
-```
+### Tools
 
-*(Examples use invented content.)*
+**`search_reddit_opinions_reviews`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `top` · `new` · `comments`), `time_range` (`hour` … `all`), `limit` (1–25, default 15). Returns posts with score, upvote ratio, comment count, date, subreddit and excerpt, plus a per-subreddit summary and search tips.
 
-## Security model
+**`read_reddit_threads`**: `threads` (1–5 post IDs or Reddit URLs, including share links and comment permalinks), `comment_sort` (`best` · `top` · `controversial` · `new` · `qa`). Returns each post and up to 20 top-level comments with replies three levels deep, trimmed, with `(OP)`/`(mod)` markers and no usernames.
 
-- The MCP endpoint lives only at `/mcp/<MCP_PATH_SECRET>`. Every other path, including `/mcp` and `/.well-known/*`, returns a plain **404**, so the server is invisible to anyone without the URL. (claude.ai custom connectors can't send auth headers, and a 401 would make claude.ai attempt OAuth.)
-- The secret is compared in constant time. If it's missing or shorter than 32 characters, the server answers nothing.
-- **If the URL leaks**, the worst case is someone using up your Reddit rate limit. To rotate, change `MCP_PATH_SECRET` in Vercel, redeploy, and update the connector URL.
-- Nothing is stored. Logs record error types and status codes only, never secrets, paths or Reddit content.
+### How the access gate works
 
-## Other clients
+The MCP endpoint lives only at `/mcp/<MCP_PATH_SECRET>`, compared in constant time. Every other path, including `/mcp` and `/.well-known/*`, returns a plain 404 and never a 401, because claude.ai custom connectors can't send auth headers and a 401 makes claude.ai attempt OAuth. If the secret is missing or shorter than 32 characters, the server answers nothing. Logs record error types only, never secrets, paths or Reddit content.
 
-The same URL works in any client that supports remote MCP servers over Streamable HTTP.
+### Other clients
 
-**Claude Code:**
+Any client that supports remote MCP over Streamable HTTP works with the same URL, e.g. Claude Code:
 
 ```sh
 claude mcp add --transport http upthread "https://<your-app>.vercel.app/mcp/<MCP_PATH_SECRET>"
 ```
 
-**Claude Desktop:** *Settings → Connectors → Add custom connector*, using the same URL.
-
-## Local development
+### Local development
 
 ```sh
 pnpm install
 cp .env.example .env.local   # fill in values; never commit them
 pnpm dev                     # http://localhost:3000/mcp/<MCP_PATH_SECRET>
 pnpm test                    # unit tests (no network)
-MCP_PATH_SECRET=... node scripts/test-client.mjs http://localhost:3000     # live smoke test
+MCP_PATH_SECRET=... node scripts/test-client.mjs http://localhost:3000            # live smoke test
 MCP_PATH_SECRET=... node scripts/check-deploy.mjs https://<your-app>.vercel.app  # gate check
 ```
 
-Tip: to keep secrets out of files and shell history, store them in a password manager and inject them at run time, e.g. 1Password's `op run --env-file <refs-file> -- pnpm dev`.
+Generate a secret from the command line with `openssl rand -base64 32 | tr '+/' '-_' | tr -d '='`. Design notes are in [`docs/superpowers/specs`](docs/superpowers/specs).
 
-## Troubleshooting
-
-- **Connector shows no tools / fails to connect:** check the URL ends in `/mcp/<your secret>` and that `MCP_PATH_SECRET` in Vercel matches (redeploy after changing env vars).
-- **Claude answers without checking Reddit:** see [Getting Claude to use it without asking](#getting-claude-to-use-it-without-asking), or just add "check Reddit" to your question.
-- **"Reddit rejected the app credentials":** check the client ID, secret and user agent, and that your app is still registered and approved.
-- **"Reddit rate limit reached":** the limit is about 100 requests per minute per app. Wait for the reset shown.
-- **"Couldn't resolve share link":** open the link in a browser and paste the full `reddit.com/r/…/comments/…` URL instead.
-
-## Compliance
-
-Upthread for Reddit is not affiliated with or endorsed by Reddit, Inc. You're responsible for following Reddit's [Data API Terms](https://www.redditinc.com/policies/data-api-terms) and [Developer Terms](https://www.redditinc.com/policies/developer-terms): personal, non-commercial use; no model training; no storing content.
+</details>
 
 ## License
 
