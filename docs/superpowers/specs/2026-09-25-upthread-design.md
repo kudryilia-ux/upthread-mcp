@@ -126,7 +126,12 @@ The Reddit client is the part most likely to change. Reddit has said third-party
 
 ## 6. Tools and output
 
-Both tools return plain text only: no `outputSchema` and no `structuredContent`, to avoid sending the same data twice. Both are annotated `readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true`. The server's `instructions` field briefly says what Upthread is for, and that Reddit links from web search can be read with `read_threads`.
+Both tools return plain text only: no `outputSchema` and no `structuredContent`, to avoid sending the same data twice. Both are annotated `readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true`. The server's `instructions` field briefly says what Upthread is for and describes **two routes to finding threads**:
+
+1. **Reddit search** (`search_reddit`) matches posts, not comments.
+2. **Web search** (the client's own, for example claude.ai's): for specific details that may be buried in comments, or when Reddit search misses, search the web with `site:reddit.com` and pass the thread URLs to `read_threads`. Web search engines index comment text, so this route covers the missing comment search.
+
+Upthread doesn't run web searches itself. The client already has web search, and a server-side version would need a second paid API key (see §12).
 
 **Output never includes usernames.** It uses only `(OP)` for the original poster and `(mod)` for moderator-distinguished comments.
 
@@ -139,7 +144,7 @@ Both tools return plain text only: no `outputSchema` and no `structuredContent`,
 | `time_range` | `hour` \| `day` \| `week` \| `month` \| `year` \| `all` | `all` |
 | `limit` | integer 1–25 | 15 |
 
-It always searches all of Reddit (`/search`, `type=link`). If the user explicitly asks for one subreddit, Claude can put `subreddit:name` in the query.
+It always searches all of Reddit (`/search`, `type=link`). Claude may run an **additional** search narrowed with `subreddit:name` when the user asks for a community or when web search shows where a topic is discussed. It is always in addition to a general search, never in place of one.
 
 Output (illustrative; invented content):
 
@@ -219,7 +224,8 @@ Descriptions are neutral: they say what the tool returns and never mention conse
 - Look for FAQ, megathread and "discussion" threads, which often hold the best answers.
 - Read only threads clearly relevant to the question, and rephrase rather than read marginal ones.
 - Use `comment_sort: controversial` when the range of views matters. It returns top-level comments only.
-- Reddit links from web search can go straight into `read_threads`.
+- Reddit links from web search can go straight into `read_threads`. Web search is the route for details buried in comments.
+- A `subreddit:` search is only an addition to a general search, never a replacement.
 
 ## 7. Errors
 
@@ -290,6 +296,7 @@ The work is test-driven. **Vitest** is added as a dev dependency, and `pnpm test
    - a product ("how do XM5s hold up long-term")
    - a movie ("what does the Tenet opera scene mean")
    - general advice
+   - a detail likely buried in comments (for example "do XM5 hinges crack"). Check that Claude uses web search and then `read_threads`
 
    The results decide how to tune the output limits and description tips.
 
@@ -348,3 +355,4 @@ The README is the product page on GitHub, so it has to work for a stranger who h
 - `morechildren` expansion for very large threads (the endpoint must be called one request at a time).
 - Focusing on a specific comment when a permalink points to one.
 - Moving to Reddit's Developer Platform if the Data API is retired.
+- An optional web-search tool (for example the Brave or Exa API) for clients that have no web search of their own. It stays off unless its API key is set.
