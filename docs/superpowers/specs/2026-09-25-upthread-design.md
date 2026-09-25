@@ -80,7 +80,7 @@ The Reddit client is the part most likely to change. Reddit has said third-party
 ## 4. Access gate
 
 - The MCP endpoint is `app/mcp/[secret]/route.ts`, which exports the handler as GET and POST, the same as the template.
-  - `mcp-handler` 2.2.0 answers every request it receives and leaves routing to Next.js, so it needs no path configuration.
+  - `mcp-handler` 2.2.0 only serves its own endpoint path (`/mcp` by default), despite its docs. After the gate passes, the route forwards the request with its path rewritten to `/mcp`, which also keeps the secret out of everything downstream.
 - The route compares the `secret` path segment with `MCP_PATH_SECRET` using a **constant-time comparison**: `crypto.timingSafeEqual` on SHA-256 digests of both values, which avoids leaking the length.
   - If they match, the request goes to the MCP handler.
   - If they don't, the route returns a plain `404 Not Found`, identical to Next.js's normal 404 for an unknown path.
