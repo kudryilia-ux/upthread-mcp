@@ -237,7 +237,7 @@ Tool failures come back as MCP tool results with `isError: true` and a short, pl
 | `InvalidThreadRef` | "Couldn't read `<input>` as a Reddit thread. Pass a post ID or a reddit.com/redd.it URL." Other threads still load |
 | Unresolved share link | "Couldn't resolve share link `<input>`. Pass the full reddit.com URL." |
 | Thread 403/404 | "Thread `<id>` is unavailable (removed, private or quarantined)." Other threads still load |
-| No search results | "No results for `<query>`", plus the hints from §6.1 |
+| No search results | A normal result (not `isError`): "No results for `<query>`", plus the hints from §6.1 |
 | Credentials rejected (token request or API 401 after the retry) | "Reddit rejected the app credentials; the server owner needs to check them." |
 | Missing `REDDIT_*` environment variables | Same credentials message |
 | Rate limited | "Reddit rate limit reached; resets in ~Ns." |
