@@ -1,6 +1,7 @@
 {
-  "name": "next.js-mcp-server",
+  "name": "upthread-mcp",
   "version": "0.1.0",
+  "description": "Upthread for Reddit: an MCP server that lets Claude search Reddit and read threads.",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,7 +9,9 @@
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
-    "test:client": "node scripts/test-client.mjs"
+    "test:client": "node scripts/test-client.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",
@@ -26,7 +29,8 @@
     "@types/react": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.2.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3"
   },
   "engines": {
     "node": ">=20"
