@@ -4,7 +4,7 @@ import type { RedditClient } from "./reddit/client";
 import { registerReadThreads } from "./tools/read-threads";
 import { registerSearchReddit } from "./tools/search-reddit";
 
-export const SERVER_INSTRUCTIONS = `Upthread for Reddit lets you use Reddit as a source alongside web search, for any question where people's experiences, opinions, explanations or niche knowledge help.
+export const SERVER_INSTRUCTIONS = `Upthread for Reddit gives you Reddit as a source. Use it proactively, without being asked and even when the user doesn't mention Reddit, whenever real people's experiences, opinions, reviews, recommendations or explanations would help: products and how they hold up, movies, shows and games (including what a scene or ending means), places and travel, advice, troubleshooting, or what people think or say about something. Use it alongside web search, not instead of it.
 
 Two routes to threads:
 1. search_reddit searches posts across all of Reddit (titles and bodies, not comments). Pick relevant threads from the list, then read them with read_threads.

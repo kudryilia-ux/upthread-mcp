@@ -5,7 +5,7 @@ import type { RedditClient } from "../reddit/client";
 import { formatSearchResults } from "../format/search";
 import { errorResult, textResult } from "./result";
 
-export const SEARCH_REDDIT_DESCRIPTION = `Search Reddit posts across all of Reddit. Returns a compact list: post ID, title, subreddit, flair, score with upvote ratio, comment count, date, and a short excerpt. It does not return comments; pass the relevant post IDs to read_threads for those.
+export const SEARCH_REDDIT_DESCRIPTION = `Use whenever real people's experiences, opinions, reviews, recommendations or explanations would help answer the question: products and purchases, how something holds up over time, movies, shows, books and games (including what a scene or ending means), travel, careers, fitness, software problems, or what people think or say about anything. Call it alongside web search, even when the user doesn't mention Reddit. It searches posts across all of Reddit and returns a compact list: post ID, title, subreddit, flair, score with upvote ratio, comment count, date and a short excerpt. It does not return comments; pass the relevant post IDs to read_threads for those.
 
 Reddit search is keyword-based and matches post titles and bodies, not comments. Tips:
 - Write queries the way Redditors title posts: short product or topic names, "X vs Y", common nicknames.

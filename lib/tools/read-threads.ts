@@ -7,7 +7,7 @@ import { resolveThreadRef } from "../reddit/refs";
 import { formatThread } from "../format/thread";
 import { errorResult, textResult } from "./result";
 
-export const READ_THREADS_DESCRIPTION = `Read up to 5 Reddit threads: each post plus a bounded set of its comments and replies (20 top-level comments, up to 3 levels deep, long text trimmed), with scores, dates and (OP)/(mod) markers.
+export const READ_THREADS_DESCRIPTION = `Read up to 5 Reddit threads: each post plus a bounded set of its comments and replies (20 top-level comments, up to 3 levels deep, long text trimmed), with scores, dates and (OP)/(mod) markers. Use it on post IDs from search_reddit, and on any Reddit links your web search finds, since Reddit pages usually can't be opened directly. The comments are where most of the experiences and answers are.
 
 Accepts post IDs from search_reddit, or Reddit URLs in any common form (reddit.com, old/new/np/m.reddit.com, redd.it, share links, comment permalinks), including Reddit links found with your web search.
 comment_sort: best (default) for the most useful comments; top for the highest scored; controversial when the range of views matters (returns top-level comments only); new for recent replies; qa for Q&A-style threads.
