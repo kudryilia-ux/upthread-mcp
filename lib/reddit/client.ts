@@ -1,4 +1,4 @@
-import { CredentialsError, RateLimitedError, ThreadUnavailableError, UpstreamError } from "./errors";
+import { AccessDeniedError, CredentialsError, RateLimitedError, ThreadUnavailableError, UpstreamError } from "./errors";
 
 const TOKEN_URL = "https://www.reddit.com/api/v1/access_token";
 const API_ORIGIN = "https://oauth.reddit.com";
@@ -58,11 +58,17 @@ export class RedditClient {
         await this.opts.sleep(500);
         continue;
       }
-      if (res.status === 403 || res.status === 404) {
+      if ((res.status === 403 || res.status === 404) && path.startsWith("/comments/")) {
         throw new ThreadUnavailableError(path.split("/").filter(Boolean).pop() ?? path);
       }
+      if (res.status === 403) throw new AccessDeniedError(res.status);
       if (!res.ok) throw new UpstreamError(`HTTP ${res.status}`);
-      return res.json();
+      try {
+        return await res.json();
+      } catch (e) {
+        const name = (e as { name?: string })?.name;
+        throw new UpstreamError(name === "TimeoutError" || name === "AbortError" ? "timeout" : "bad response");
+      }
     }
   }
 
@@ -121,6 +127,7 @@ export class RedditClient {
       },
       body: "grant_type=client_credentials",
     });
+    if (res.status === 429) throw new RateLimitedError(this.headerSeconds(res.headers) ?? 60);
     if (res.status >= 500) throw new UpstreamError(`HTTP ${res.status}`);
     const body = (await res.json().catch(() => ({}))) as { access_token?: string; expires_in?: number };
     if (!res.ok || !body.access_token) throw new CredentialsError();

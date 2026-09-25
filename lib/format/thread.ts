@@ -43,11 +43,10 @@ export function formatThread({ post, comments }: Thread, commentSort: CommentSor
       post.permalink,
     ].join(" · "),
   ];
-  if (post.isSelf) {
-    const body = post.selftext.replace(/\n{3,}/g, "\n\n").trim();
+  if (!post.isSelf) lines.push(`Link: ${post.url}`);
+  const body = post.selftext.replace(/\n{3,}/g, "\n\n").trim();
+  if (post.isSelf || body) {
     lines.push(`Post (OP): ${body ? trimText(body, THREAD_LIMITS.postChars) : "(no text)"}`);
-  } else {
-    lines.push(`Link: ${post.url}`);
   }
   const kept = selectComments(comments);
   lines.push("");

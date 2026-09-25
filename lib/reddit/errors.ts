@@ -27,6 +27,12 @@ export class UpstreamError extends RedditError {
   }
 }
 
+export class AccessDeniedError extends RedditError {
+  constructor(status: number) {
+    super(`Reddit refused the request (HTTP ${status}); the server owner should check the app's approval and User-Agent.`);
+  }
+}
+
 export class ThreadUnavailableError extends RedditError {
   constructor(id: string) {
     super(`Thread ${id} is unavailable (removed, private or quarantined).`);

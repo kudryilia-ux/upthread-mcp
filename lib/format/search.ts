@@ -30,7 +30,7 @@ function entry(p: PostSummary, i: number): string {
   meta.push(`${p.numComments} comments`, formatDate(p.createdUtc));
   if (!p.isSelf && p.domain) meta.push(`link: ${p.domain}`);
   const lines = [`${i + 1}. [${p.id}] ${p.over18 ? "[NSFW] " : ""}${p.title}`, `   ${meta.join(" · ")}`];
-  const excerpt = p.isSelf ? collapse(p.selftext) : "";
+  const excerpt = collapse(p.selftext);
   if (excerpt) lines.push(`   "${trimText(excerpt, EXCERPT_CHARS, "…")}"`);
   return lines.join("\n");
 }

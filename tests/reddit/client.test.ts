@@ -147,3 +147,35 @@ describe("RedditClient.resolveShareLink", () => {
     await expect(none.client.resolveShareLink("/r/x/s/AbCd")).resolves.toBeNull();
   });
 });
+
+describe("RedditClient final-review fixes", () => {
+  it("reports a 403 on a non-thread path as an access problem, not a missing thread", async () => {
+    const { client } = setup([token(), json({ reason: "blocked" }, 403)]);
+    const err = (await client.get("/search", { q: "x" }).catch((e) => e)) as Error;
+    expect(err).not.toBeInstanceOf(ThreadUnavailableError);
+    expect(err.message).toBe(
+      "Reddit refused the request (HTTP 403); the server owner should check the app's approval and User-Agent.",
+    );
+  });
+
+  it("still reports 403/404 on /comments/<id> as an unavailable thread", async () => {
+    const { client } = setup([token(), json({}, 403)]);
+    await expect(client.get("/comments/abc")).rejects.toThrow("Thread abc is unavailable");
+  });
+
+  it("maps a non-JSON 200 body to UpstreamError", async () => {
+    const { client } = setup([token(), new Response("<html>interstitial</html>", { status: 200 })]);
+    await expect(client.get("/search")).rejects.toThrow("(bad response)");
+  });
+
+  it("maps a body read that fails mid-stream to UpstreamError", async () => {
+    const body = new ReadableStream({ start(c) { c.error(Object.assign(new Error("t"), { name: "TimeoutError" })); } });
+    const { client } = setup([token(), new Response(body, { status: 200 })]);
+    await expect(client.get("/search")).rejects.toBeInstanceOf(UpstreamError);
+  });
+
+  it("maps a 429 from the token endpoint to RateLimitedError, not CredentialsError", async () => {
+    const { client } = setup([json({}, 429, { "x-ratelimit-reset": "20" })]);
+    await expect(client.get("/a")).rejects.toBeInstanceOf(RateLimitedError);
+  });
+});

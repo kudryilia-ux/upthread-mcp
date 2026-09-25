@@ -49,3 +49,13 @@ describe("formatSearchResults", () => {
     expect(many).not.toContain("Few results");
   });
 });
+
+describe("formatSearchResults final-review fixes", () => {
+  it("shows the excerpt for link posts that have body text", () => {
+    const out = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [
+      post({ isSelf: false, domain: "i.redd.it", selftext: "Is this mold on my wall?" }),
+    ]);
+    expect(out).toContain("link: i.redd.it");
+    expect(out).toContain('"Is this mold on my wall?"');
+  });
+});
