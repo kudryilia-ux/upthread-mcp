@@ -81,3 +81,14 @@ describe("formatThread", () => {
     expect(formatThread({ post: post({ over18: true }), comments: [] }, "best")).toContain("=== [1abc2de] [NSFW] ");
   });
 });
+
+describe("formatThread final-review fixes", () => {
+  it("shows both the link and the OP's text for image posts with a body", () => {
+    const out = formatThread(
+      { post: post({ isSelf: false, url: "https://i.example.com/pic.jpg", selftext: "Is this mold on my wall?" }), comments: [] },
+      "best",
+    );
+    expect(out).toContain("Link: https://i.example.com/pic.jpg");
+    expect(out).toContain("Post (OP): Is this mold on my wall?");
+  });
+});

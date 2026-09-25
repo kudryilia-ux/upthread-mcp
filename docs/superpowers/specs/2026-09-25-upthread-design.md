@@ -209,7 +209,7 @@ Limits:
   - `AutoModerator` comments
   - stickied (pinned) comments
   - `more` placeholders
-- Link posts show the linked URL in place of a body.
+- Link posts show the linked URL. If a link post (for example an image post) also has body text, the text is shown too.
 - Each top-level comment shows its date.
 - The expected size is about 3k tokens per thread, and about 15k for 5 threads.
 
@@ -241,6 +241,7 @@ Tool failures come back as MCP tool results with `isError: true` and a short, pl
 | Credentials rejected (token request or API 401 after the retry) | "Reddit rejected the app credentials; the server owner needs to check them." |
 | Missing `REDDIT_*` environment variables | Same credentials message |
 | Rate limited | "Reddit rate limit reached; resets in ~Ns." |
+| 403 on a non-thread request (app not approved, blocked User-Agent) | "Reddit refused the request (HTTP 403); the server owner should check the app's approval and User-Agent." |
 | 5xx after retry, or timeout | "Reddit is not responding right now (HTTP <code> / timeout). Try again shortly." |
 
 **Logging** (`console.error`, visible in Vercel logs):

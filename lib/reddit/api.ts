@@ -1,4 +1,5 @@
 import type { RedditClient } from "./client";
+import { ThreadUnavailableError } from "./errors";
 import type { Comment, CommentSort, PostSummary, SearchSort, Thread, TimeRange } from "./types";
 
 type Getter = Pick<RedditClient, "get">;
@@ -60,6 +61,7 @@ export async function searchPosts(
 export async function getThread(client: Getter, id: string, o: { commentSort: CommentSort }): Promise<Thread> {
   const sort = o.commentSort === "best" ? "confidence" : o.commentSort;
   const json = (await client.get(`/comments/${id}`, { sort, limit: 100, depth: 3 })) as unknown[];
-  const postData = children(json?.[0])[0]?.data ?? {};
+  const postData = children(json?.[0])[0]?.data;
+  if (!postData || !str(postData.id)) throw new ThreadUnavailableError(id);
   return { post: toPost(postData), comments: toComments(json?.[1]) };
 }

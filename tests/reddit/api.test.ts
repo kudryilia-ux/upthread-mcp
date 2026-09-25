@@ -49,3 +49,10 @@ describe("getThread", () => {
     expect(comments[0].replies[0].replies[0]).toMatchObject({ id: "c3", isMod: true, replies: [] });
   });
 });
+
+describe("getThread final-review fixes", () => {
+  it("throws ThreadUnavailableError when the post listing is empty", async () => {
+    const get = vi.fn(async () => [listing([]), listing([])]);
+    await expect(getThread({ get }, "1abc2de", { commentSort: "best" })).rejects.toThrow("Thread 1abc2de is unavailable");
+  });
+});
