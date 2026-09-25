@@ -70,8 +70,8 @@ Start a new chat and ask: *"Search Reddit for how Sony XM5 headphones hold up af
 Mentioning "Reddit" in your question always works. Without it, Claude decides for itself whether to check Reddit, and by default it often doesn't, because it keeps connectors on standby until a question clearly calls for them. Any of these makes it more automatic (most reliable first):
 
 1. **Load tools at the start of a chat.** Click **+** (next to the message box) → **Connectors** → **Tool access** → **Tools already loaded**. Claude then knows about Upthread from your first message. Turn off connectors you don't need in that chat to keep it fast.
-2. **Install the Upthread skill** (one-time). Download [`upthread-skill.zip`](https://github.com/kudryilia-ux/upthread-mcp/raw/main/skill/upthread-skill.zip), then in claude.ai go to *Settings → Capabilities*, turn on **Code execution**, and under **Skills** click **Upload skill** and choose the file.
-3. **Add a personal preference** (one-time). In *Settings → Profile*, under personal preferences, paste:
+2. **Install the Upthread skill** (one-time). Download [`upthread-skill.zip`](https://github.com/kudryilia-ux/upthread-mcp/raw/main/skill/upthread-skill.zip), then in claude.ai open **Customize → Skills** and upload the file (on older layouts: *Settings → Capabilities → Skills → Upload skill*). Skills need code execution turned on in your settings.
+3. **Add an instruction for Claude** (one-time). Click your initials (bottom left) → **Settings** → **General** → **Instructions for Claude** (called "personal preferences" on older layouts), and paste:
    > For questions about how people experience or view something (products, media, places, advice, troubleshooting), also check Reddit with the Upthread tools and combine it with web search.
 
 Even with these, Claude sometimes skips Reddit when web search seems enough. If you want Reddit for sure, say so.
