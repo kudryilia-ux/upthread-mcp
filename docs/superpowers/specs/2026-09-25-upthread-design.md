@@ -299,17 +299,40 @@ The work is test-driven. **Vitest** is added as a dev dependency, and `pnpm test
 - Remove `package-lock.json`; the project uses pnpm (`packageManager` field).
 - Add `.env.example` with variable names only: `MCP_PATH_SECRET=`, `REDDIT_CLIENT_ID=`, `REDDIT_CLIENT_SECRET=`, `REDDIT_USER_AGENT=`. It is committed despite the `.env*` ignore rule via `!.env.example`, and gitleaks still scans it.
 - Package name `upthread-mcp`; MCP `serverInfo.name` `upthread`.
-- **README** (rewritten), covering:
-  - what it is
-  - personal and non-commercial use per Reddit's terms, and no training
-  - bringing your own approved Reddit app (new keys need Reddit's approval)
-  - registering the app at developers.reddit.com
-  - the environment variables and how to generate the secret
-  - deploying and connecting in claude.ai
-  - the User-Agent format `<platform>:<app id>:<version> (by /u/<username>)`
+- The README is rewritten from scratch; see §10.
 - Renaming the GitHub repo and the Vercel project is up to the owner and outside this plan.
 
-## 10. Rollout
+## 10. README (setup guide for other people)
+
+The README is the product page on GitHub, so it has to work for a stranger who has never heard of MCP gateways or Reddit's API rules. It should read top to bottom as a path from "what is this" to "it's answering my questions in claude.ai".
+
+**Outline, in order:**
+
+1. **Name and one-line pitch.** "Upthread for Reddit: let Claude search Reddit and read the threads, alongside its web search." Badges for license, Node version and MCP.
+2. **Demo.** A short GIF or screenshot of a claude.ai answer that uses Reddit threads (with invented or permission-cleared content), then a 3-bullet "what it does".
+3. **Before you start: you need your own Reddit API app.** Stated up front, not buried:
+   - Reddit closed self-service API keys in November 2025. New keys need Reddit's approval. Link to the request form and the Responsible Builder Policy.
+   - If you already have an app, register it at developers.reddit.com/app-registration.
+   - Personal, non-commercial use only; no model training (Reddit's terms).
+4. **Quick start (about 10 minutes):**
+   1. Click **Deploy with Vercel**. The button clones the repo and prompts for the four environment variables, each with a one-line description and a link to the matching README section.
+   2. Generate the URL secret (one copy-paste command).
+   3. In claude.ai: Settings → Connectors → Add custom connector → paste `https://<your-app>.vercel.app/mcp/<secret>`.
+   4. Ask a test question.
+5. **Configuration reference.** A table of the four variables: what each is, where to find it, and an example value (the User-Agent format `<platform>:<app id>:<version> (by /u/<username>)` included).
+6. **Using it well.** How to ask questions that make good use of Reddit, and the fact that Claude can pass Reddit links from its web search to `read_threads`.
+7. **Tools reference.** Parameters for both tools and a short example output (invented content).
+8. **Security model.** The secret URL, why every other path returns 404, how to rotate the secret, and what a leaked secret would allow (someone using your rate limit, nothing more).
+9. **Other clients.** Claude Desktop and Claude Code config snippets, using the same URL.
+10. **Local development.** `pnpm dev`, running the tests, and the smoke-test script. Mention `op run` as one option for keeping secrets out of shell history, without requiring 1Password.
+11. **Troubleshooting.** Connector shows no tools (check the URL and secret), "credentials rejected", rate limits, share links that don't resolve.
+12. **Compliance and license.** Not affiliated with Reddit, Inc.; follow Reddit's Data API terms; MIT license.
+
+**Deploy button:** `https://vercel.com/new/clone?repository-url=<repo>&env=MCP_PATH_SECRET,REDDIT_CLIENT_ID,REDDIT_CLIENT_SECRET,REDDIT_USER_AGENT&envDescription=…&envLink=<README anchor>`. The exact parameters are confirmed against Vercel's docs during implementation.
+
+**Repo metadata:** a description matching the pitch; topics `mcp`, `mcp-server`, `model-context-protocol`, `claude`, `reddit`, `nextjs`, `vercel`.
+
+## 11. Rollout
 
 1. Implement and pass the unit tests locally.
 2. The owner runs the local smoke test through `op run`.
@@ -318,7 +341,7 @@ The work is test-driven. **Vitest** is added as a dev dependency, and `pnpm test
 4. The owner runs `check-deploy.mjs`, then updates the claude.ai connector URL to `https://<host>/mcp/<secret>`.
 5. Try the three kinds of question in claude.ai, and tune the limits and tips if needed.
 
-## 11. Future options (not in v1)
+## 12. Future options (not in v1)
 
 - An optional *additional* targeted search whose results appear alongside the general search, never in place of it.
 - A community-lookup tool for niche topics.
