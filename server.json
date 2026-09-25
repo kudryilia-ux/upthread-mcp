@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.kudryilia-ux/upthread",
+  "title": "Upthread for Reddit",
+  "description": "Let Claude search Reddit and read threads. Self-hosted; bring your own Reddit API app.",
+  "repository": { "url": "https://github.com/kudryilia-ux/upthread-mcp", "source": "github" },
+  "version": "0.1.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://{deployment_host}/mcp/{mcp_path_secret}",
+      "variables": {
+        "deployment_host": { "description": "Your deployment's host, e.g. my-upthread.vercel.app", "isRequired": true },
+        "mcp_path_secret": { "description": "The MCP_PATH_SECRET you configured", "isRequired": true, "isSecret": true }
+      }
+    }
+  ]
+}
