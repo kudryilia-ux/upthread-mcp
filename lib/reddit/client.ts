@@ -33,13 +33,13 @@ export class RedditClient {
   }
 
   async get(path: string, params: Record<string, string | number> = {}): Promise<unknown> {
-    this.checkBudget();
     const url = new URL(API_ORIGIN + path);
     for (const [k, v] of Object.entries({ ...params, raw_json: 1 })) url.searchParams.set(k, String(v));
 
     let retried401 = false;
     let retried5xx = false;
     for (;;) {
+      this.spendBudget();
       const res = await this.send(url.toString(), {
         headers: { authorization: `Bearer ${await this.getToken()}`, "user-agent": this.opts.userAgent },
       });
@@ -51,7 +51,12 @@ export class RedditClient {
         this.token = null;
         continue;
       }
-      if (res.status === 429) throw new RateLimitedError(this.headerSeconds(res.headers) ?? 60);
+      if (res.status === 429) {
+        const reset = this.headerSeconds(res.headers) ?? 60;
+        this.remaining = 0;
+        this.resetAt = this.opts.now() + reset * 1000;
+        throw new RateLimitedError(reset);
+      }
       if (res.status >= 500) {
         if (retried5xx) throw new UpstreamError(`HTTP ${res.status}`);
         retried5xx = true;
@@ -80,18 +85,22 @@ export class RedditClient {
       ["https://www.reddit.com" + pathname, { "user-agent": this.opts.userAgent }],
     ];
     for (const [url, headers] of attempts) {
+      this.spendBudget();
       const res = await this.send(url, { headers, redirect: "manual" });
+      this.recordRateLimit(res.headers);
       const location = res.headers.get("location");
       if (res.status >= 300 && res.status < 400 && location) return location;
     }
     return null;
   }
 
-  private checkBudget() {
+  /** Fails fast when Reddit's budget is nearly used up; otherwise counts the call locally. */
+  private spendBudget() {
     const now = this.opts.now();
     if (this.remaining !== null && this.remaining <= MIN_REMAINING && now < this.resetAt) {
       throw new RateLimitedError((this.resetAt - now) / 1000);
     }
+    if (this.remaining !== null && now < this.resetAt) this.remaining -= 1;
   }
 
   private recordRateLimit(headers: Headers) {

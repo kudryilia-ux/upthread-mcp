@@ -49,3 +49,15 @@ describe("gated MCP route", () => {
     await client.close();
   });
 });
+
+describe("gated MCP route: every method (v1.1)", () => {
+  it("returns 404, not 405, for DELETE, PUT and PATCH with a wrong secret", async () => {
+    const route = await import("@/app/mcp/[secret]/route");
+    for (const m of ["DELETE", "PUT", "PATCH"] as const) {
+      const handler = (route as Record<string, unknown>)[m] as typeof POST | undefined;
+      expect(handler, `${m} exported`).toBeTypeOf("function");
+      const res = await handler!(new Request("http://localhost/mcp/nope", { method: m }), ctx("nope"));
+      expect(res.status).toBe(404);
+    }
+  });
+});

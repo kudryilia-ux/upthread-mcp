@@ -179,3 +179,36 @@ describe("RedditClient final-review fixes", () => {
     await expect(client.get("/a")).rejects.toBeInstanceOf(RateLimitedError);
   });
 });
+
+describe("RedditClient v1.1 rate-limit and refresh fixes", () => {
+  it("after a 429, the next call fails fast without hitting Reddit", async () => {
+    const { client, calls } = setup([token(), json({}, 429, { "x-ratelimit-reset": "30" })]);
+    await expect(client.get("/a")).rejects.toBeInstanceOf(RateLimitedError);
+    await expect(client.get("/b")).rejects.toBeInstanceOf(RateLimitedError);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("counts calls locally so a batch can't overrun the remaining budget", async () => {
+    const { client, calls } = setup([
+      token(), json({}, 200, { "x-ratelimit-remaining": "4", "x-ratelimit-reset": "30" }), json({}), json({}),
+    ]);
+    await client.get("/a"); // remaining 4 -> Reddit says 4
+    await client.get("/b"); // local count: 3
+    await expect(client.get("/c")).resolves.toEqual({}); // local count: 2 after this call
+    await expect(client.get("/d")).rejects.toBeInstanceOf(RateLimitedError);
+    expect(calls.filter((c) => !c.url.includes("access_token"))).toHaveLength(3);
+  });
+
+  it("share-link lookups respect the budget too", async () => {
+    const { client, calls } = setup([token(), json({}, 429, { "x-ratelimit-reset": "30" })]);
+    await expect(client.get("/a")).rejects.toBeInstanceOf(RateLimitedError);
+    await expect(client.resolveShareLink("/r/x/s/Ab")).rejects.toBeInstanceOf(RateLimitedError);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("a failed token refresh doesn't poison later calls", async () => {
+    const { client } = setup([json({}, 503), token(), json({ ok: 1 })]);
+    await expect(client.get("/a")).rejects.toBeInstanceOf(UpstreamError);
+    await expect(client.get("/a")).resolves.toEqual({ ok: 1 });
+  });
+});
