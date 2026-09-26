@@ -21,3 +21,10 @@ export function trimText(text: string, max: number, suffix = "…[trimmed]"): st
 export const redactUsernames = (text: string) =>
   text.replace(/(^|[^A-Za-z0-9_])\/?(u|user)\/[A-Za-z0-9_\\-]{3,40}/gi, (_m, pre: string, kind: string) =>
     `${pre}${kind.toLowerCase() === "user" ? "user" : "u"}/[user]`);
+
+/** Describes what kind of evidence Reddit is, so Claude can weigh it against other sources. Information, not orders. */
+export const SOURCE_NOTE =
+  "About this source: these are individual Reddit users' posts. They're strongest for first-hand experience, " +
+  "real-world problems and ideas worth checking, and weaker for facts, specs, safety or medical questions, where " +
+  "editorial or official sources are usually more reliable. When other sources are thin, these posts may be the " +
+  "best evidence available.";

@@ -4,6 +4,7 @@ import { getThread } from "../reddit/api";
 import type { RedditClient } from "../reddit/client";
 import { RedditError } from "../reddit/errors";
 import { resolveThreadRef } from "../reddit/refs";
+import { SOURCE_NOTE } from "../format/common";
 import { formatThread } from "../format/thread";
 import { errorName, errorResult, logToolCall, textResult } from "./result";
 
@@ -56,7 +57,7 @@ export async function runReadThreads(
   );
   const body = results.map((r) => r.text).join("\n\n");
   if (outcome === "error") return { isError: true, content: [{ type: "text" as const, text: body }] };
-  return textResult(body);
+  return textResult(`${SOURCE_NOTE}\n\n${body}`);
 }
 
 function errorText(err: unknown): string {
