@@ -1,5 +1,5 @@
 import type { PostSummary, SearchSort, TimeRange } from "../reddit/types";
-import { collapse, formatDate, formatRatio, formatScore, redactUsernames, trimText } from "./common";
+import { collapse, formatDate, formatRatio, formatScore, redactUsernames, SOURCE_NOTE, trimText } from "./common";
 
 const EXCERPT_CHARS = 200;
 const TOP_SUBREDDITS = 4;
@@ -50,6 +50,8 @@ export function formatSearchResults(
   if (posts.length === 0) return `No results for "${query}".\n\n${THIN_NOTES}`;
   const time = o.timeRange === "all" ? "all time" : `past ${o.timeRange}`;
   const parts = [
+    SOURCE_NOTE,
+    "",
     `Search "${query}" · ${o.sort} · ${time} · ${posts.length} results`,
     subredditLine(posts),
     "",

@@ -37,6 +37,7 @@
 
 - Same questions, answered with and without Upthread, compared pairwise by an LLM judge against a rubric: grounded in the threads actually read, shows the range of views, uses upvotes/dates/subreddits sensibly, combines with web facts when available, no invented Reddit claims.
 - Then ablations on output limits (e.g. 3 vs 5 threads, 600 vs 400 char comments) to find the best quality per token.
+- **Source weighting.** Rubric item: does the answer weigh Reddit appropriately, using it for first-hand experience, ideas and corroboration, deferring to editorial or official sources on facts, specs, safety and medical questions, and leaning on it more when other sources are thin? Compare versions of the source note at the top of results (added 2026-09-26): none, the current wording, and shorter or stronger variants. Watch for side effects: unnecessary "Reddit is anecdotal" disclaimers in answers, or Claude using Upthread less.
 - **Cost:** a few dollars per run.
 
 ## E4: claude.ai checklist (manual)
@@ -54,6 +55,7 @@ These are only shipped if the eval shows a clear gain:
 | Optional web-search discovery (one optional `SEARCH_API_KEY`, provider swappable: Serper / Brave / Tavily) | E1: meaningful recall gain over strategies 2–4 |
 | Output limit changes | E3 |
 | Description/notes wording changes | E2 |
+| Source note wording (how to weigh Reddit vs other sources) | E3 source-weighting rubric, plus E2 use rate |
 
 ## Rules
 
