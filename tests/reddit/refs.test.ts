@@ -61,3 +61,13 @@ describe("resolveThreadRef", () => {
     await expect(resolveThreadRef("https://www.reddit.com/r/m/s/A", odd)).rejects.toBeInstanceOf(ShareLinkError);
   });
 });
+
+describe("parseThreadRef v1.1 fixes", () => {
+  it.each([
+    ["https://www.reddit.com/gallery/1abc2de", "1abc2de"],
+    ["https://www.reddit.com/r/comments/comments/1abc2de/title/", "1abc2de"],
+    ["https://www.reddit.com/r/pics/comments/1abc2de/comments/", "1abc2de"],
+  ])("%s -> %s", (input, expected) => {
+    expect(parseThreadRef(input)).toEqual({ kind: "id", id: expected });
+  });
+});

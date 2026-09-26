@@ -15,4 +15,4 @@ async function handle(req: Request, { params }: Context): Promise<Response> {
   return handler(new Request(url, req));
 }
 
-export { handle as GET, handle as POST };
+export { handle as DELETE, handle as GET, handle as PATCH, handle as POST, handle as PUT };

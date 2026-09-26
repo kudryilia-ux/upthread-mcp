@@ -27,8 +27,10 @@ export function parseThreadRef(input: string): ParsedRef {
       return { kind: "id", id: segs[0].toLowerCase() };
     }
     if (host === "reddit.com" || host.endsWith(".reddit.com")) {
-      const i = segs.indexOf("comments");
-      const candidate = i >= 0 ? segs[i + 1]?.toLowerCase() : undefined;
+      // Positional, so a subreddit literally named "comments" can't confuse it.
+      const candidate = (
+        segs[0] === "comments" || segs[0] === "gallery" ? segs[1] : segs[0] === "r" && segs[2] === "comments" ? segs[3] : undefined
+      )?.toLowerCase();
       if (candidate && BASE36.test(candidate)) return { kind: "id", id: candidate };
       if (segs.length === 4 && segs[0] === "r" && segs[2] === "s") {
         return { kind: "share", pathname: `/r/${segs[1]}/s/${segs[3]}` };
