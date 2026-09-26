@@ -3,7 +3,9 @@ import { z } from "zod";
 import { searchPosts } from "../reddit/api";
 import type { RedditClient } from "../reddit/client";
 import { formatSearchResults } from "../format/search";
-import { errorResult, textResult } from "./result";
+import { errorName, errorResult, logToolCall, textResult } from "./result";
+
+const TOOL = "search_reddit_opinions_reviews";
 
 export const SEARCH_REDDIT_DESCRIPTION = `Use whenever real people's experiences, opinions, reviews, recommendations or explanations would help: products and how they hold up, movies, shows and games, travel, careers, advice, troubleshooting, or what people think or say about anything. Use it alongside web search, even when the user doesn't mention Reddit.
 
@@ -27,19 +29,22 @@ export const searchRedditInput = z
 type Args = z.output<typeof searchRedditInput>;
 
 export async function runSearchReddit(args: Args, getClient: () => Pick<RedditClient, "get">) {
+  const started = Date.now();
   try {
     const posts = await searchPosts(getClient(), {
       query: args.query, sort: args.sort, timeRange: args.time_range, limit: args.limit,
     });
+    logToolCall(TOOL, { outcome: "ok", results: posts.length }, started);
     return textResult(formatSearchResults(args.query, { sort: args.sort, timeRange: args.time_range }, posts));
   } catch (err) {
+    logToolCall(TOOL, { outcome: "error", error: errorName(err) }, started);
     return errorResult(err);
   }
 }
 
 export function registerSearchReddit(server: McpServer, getClient: () => RedditClient) {
   server.registerTool(
-    "search_reddit_opinions_reviews",
+    TOOL,
     {
       title: "Search Reddit for opinions, reviews and experiences",
       description: SEARCH_REDDIT_DESCRIPTION,
