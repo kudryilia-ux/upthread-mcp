@@ -42,7 +42,7 @@ describe("formatSearchResults", () => {
   it("adds next-step hints for 0–2 results, and a no-results line for 0", () => {
     const none = formatSearchResults("zzz", { sort: "relevance", timeRange: "all" }, []);
     expect(none).toContain('No results for "zzz".');
-    expect(none).toContain("site:reddit.com");
+    expect(none).toContain("2–4 key words");
     const few = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post()]);
     expect(few).toContain("Few results");
     const many = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post(), post({ id: "b" }), post({ id: "c" })]);
@@ -51,10 +51,9 @@ describe("formatSearchResults", () => {
 
   it("ends normal results with the search tips (moved out of the tool description)", () => {
     const out = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post(), post({ id: "b" }), post({ id: "c" })]);
-    const tips = out.slice(out.lastIndexOf("Tips:"));
+    const tips = out.slice(out.lastIndexOf("Search notes:"));
     expect(tips).toMatch(/read_reddit_threads/);
     expect(tips).toMatch(/ambiguous/i);
-    expect(tips).toMatch(/site:reddit\.com/);
     expect(tips).toMatch(/subreddit:/);
     expect(tips.length).toBeLessThan(600);
   });
@@ -74,13 +73,28 @@ describe("formatSearchResults final-review fixes", () => {
   });
 });
 
-describe("formatSearchResults combines with web search", () => {
-  it("reminds Claude to also run its web search, on normal and thin results", () => {
-    const many = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post(), post({ id: "b" }), post({ id: "c" })]);
-    const few = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post()]);
-    const none = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, []);
+describe("formatSearchResults notes are information, not instructions (v1.1)", () => {
+  const many = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post(), post({ id: "b", subreddit: "onebag" }), post({ id: "c" })]);
+  const few = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post()]);
+  const none = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, []);
+
+  it("never sends Claude to web search or site:reddit.com (Claude's web search can't see Reddit)", () => {
     for (const out of [many, few, none]) {
-      expect(out).toMatch(/Also run your web search on this question and combine both sources/);
+      expect(out).not.toMatch(/site:reddit\.com/);
+      expect(out).not.toMatch(/web search/i);
     }
+  });
+
+  it("explains that short queries work best, with an example", () => {
+    for (const out of [many, few, none]) {
+      expect(out).toContain("2–4 key words");
+      expect(out).toContain("walking shoes Europe");
+    }
+  });
+
+  it("points to community searches from the results, as an addition to the general search", () => {
+    const notes = many.slice(many.lastIndexOf("Search notes:"));
+    expect(notes).toMatch(/subreddit:/);
+    expect(notes).toMatch(/in addition to/i);
   });
 });

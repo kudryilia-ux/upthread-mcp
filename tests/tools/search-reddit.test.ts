@@ -8,6 +8,17 @@ describe("search_reddit", () => {
     expect(searchRedditInput.parse({ query: "XM5" })).toEqual({ query: "XM5", sort: "relevance", time_range: "all", limit: 15 });
   });
 
+  it("offers only relevance and new as sorts (top and comments return junk for topics)", () => {
+    expect(searchRedditInput.parse({ query: "x", sort: "new" }).sort).toBe("new");
+    expect(() => searchRedditInput.parse({ query: "x", sort: "top" })).toThrow();
+    expect(() => searchRedditInput.parse({ query: "x", sort: "comments" })).toThrow();
+  });
+
+  it("tells Claude to use 2–4 key words in the query parameter itself", () => {
+    expect(searchRedditInput.shape.query.description).toMatch(/2–4 key words/);
+    expect(SEARCH_REDDIT_DESCRIPTION).toMatch(/2–4 key words/);
+  });
+
   it("rejects empty or overlong queries and out-of-range limits", () => {
     expect(() => searchRedditInput.parse({ query: "" })).toThrow();
     expect(() => searchRedditInput.parse({ query: "x".repeat(513) })).toThrow();

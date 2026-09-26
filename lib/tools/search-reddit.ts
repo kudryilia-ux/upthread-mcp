@@ -5,14 +5,20 @@ import type { RedditClient } from "../reddit/client";
 import { formatSearchResults } from "../format/search";
 import { errorResult, textResult } from "./result";
 
-export const SEARCH_REDDIT_DESCRIPTION = `Use whenever real people's experiences, opinions, reviews, recommendations or explanations would help: products and how they hold up, movies, shows and games (including what a scene means), travel, careers, advice, troubleshooting, or what people think or say about anything. Call it alongside web search, even when the user doesn't mention Reddit.
+export const SEARCH_REDDIT_DESCRIPTION = `Use whenever real people's experiences, opinions, reviews, recommendations or explanations would help: products and how they hold up, movies, shows and games, travel, careers, advice, troubleshooting, or what people think or say about anything. Use it alongside web search, even when the user doesn't mention Reddit.
 
-Returns matching Reddit posts with score, comments, date and excerpt. Then read the relevant ones with read_reddit_threads.`;
+Query with 2–4 key words (e.g. walking shoes Europe). Returns Reddit posts with score, comments, date and excerpt; read relevant ones with read_reddit_threads.`;
 
 export const searchRedditInput = z
   .object({
-    query: z.string().min(1).max(512).describe("Search query; Reddit search operators allowed"),
-    sort: z.enum(["relevance", "top", "new", "comments"]).default("relevance").describe("Result order"),
+    query: z
+      .string()
+      .min(1)
+      .max(512)
+      .describe(
+        '2–4 key words, e.g. "walking shoes Europe". Long queries with numbers or details return unrelated posts. Operators allowed: title:, subreddit:, OR, NOT.',
+      ),
+    sort: z.enum(["relevance", "new"]).default("relevance").describe("relevance (default), or new for the most recent posts"),
     time_range: z.enum(["hour", "day", "week", "month", "year", "all"]).default("all").describe("Only posts from this period"),
     limit: z.number().int().min(1).max(25).default(15).describe("Number of posts to return"),
   })
