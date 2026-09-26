@@ -77,6 +77,16 @@ export class RedditClient {
     }
   }
 
+  /** For the setup page: can we log in to Reddit with these credentials? */
+  async checkCredentials(): Promise<"ok" | "rejected" | "unreachable"> {
+    try {
+      await this.getToken();
+      return "ok";
+    } catch (e) {
+      return e instanceof CredentialsError ? "rejected" : "unreachable";
+    }
+  }
+
   /** Follows one redirect hop of a share link (/r/<sub>/s/<code>) and returns its Location, or null. */
   async resolveShareLink(pathname: string): Promise<string | null> {
     const bearer = { authorization: `Bearer ${await this.getToken()}`, "user-agent": this.opts.userAgent };
