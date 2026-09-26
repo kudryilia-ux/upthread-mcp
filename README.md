@@ -11,7 +11,7 @@
 ## What you need
 
 - **A Claude account** that can add custom connectors (claude.ai → *Settings → Connectors*).
-- **A Reddit API app** with its *client ID* and *secret*. If you've made one before, find it at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps). If you haven't, you'll need to [request access from Reddit](https://support.reddithelp.com/hc/en-us/articles/42728983564564). Since November 2025 new apps need Reddit's approval, and that can take a while. Existing apps should be registered at [developers.reddit.com/app-registration](https://developers.reddit.com/app-registration).
+- **A Reddit API app** with its *client ID* and *secret*. If you've made one before, find it at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps). If you haven't, you'll need to [request access from Reddit](https://support.reddithelp.com/hc/en-us/articles/42728983564564). Since November 2025 new apps need Reddit's approval, and that can take a while. Existing apps should be registered at [developers.reddit.com/app-registration](https://developers.reddit.com/app-registration). The app must be a **script** or **web** app (these have a secret); an *installed app* won't work.
 - **A free [GitHub](https://github.com/signup) account and a free [Vercel](https://vercel.com/signup) account.** Vercel is the service that runs your copy; you can sign up for it with GitHub.
 
 Setup takes about 10 minutes and needs no coding.
@@ -29,7 +29,7 @@ This becomes part of your connector's address, so only you can use it. Use a pas
 - **at least 32 characters long**
 - **letters and numbers only**, with no symbols
 
-Save it somewhere safe. You'll need it in steps 3 and 5.
+Save it somewhere safe. You'll need it in steps 3 and 5. A shorter password won't work: the connector simply won't answer.
 
 ### 3. Create your copy on Vercel
 Click this button:
@@ -46,6 +46,8 @@ Sign in with GitHub when asked. Vercel will ask for four values:
 | `REDDIT_USER_AGENT` | `web:upthread:1.0 (by /u/YOUR_REDDIT_USERNAME)`, with your username in place of `YOUR_REDDIT_USERNAME` |
 
 Click **Deploy** and wait about a minute. When it's done, Vercel shows your app's address, something like `https://upthread-mcp-abc123.vercel.app`. Copy it.
+
+**Check your setup:** open that address in your browser. A setup page shows a ✅ or ❌ for your password, your Reddit settings and whether Reddit accepts them, with what to fix. It never shows the values themselves.
 
 ### 4. Build your connector address
 Join your app's address, then `/mcp/`, then your password from step 2:
@@ -78,6 +80,8 @@ Even with these, Claude sometimes skips Reddit when web search seems enough, or 
 
 ## If something isn't working
 
+**Start by opening your app's address in a browser.** The setup page shows which setting is wrong.
+
 - **Claude says it can't connect, or shows no tools:** check the connector address. It must be your Vercel address + `/mcp/` + your exact password, with no slash at the end. If you changed the password in Vercel, redeploy (Vercel → your project → **Deployments** → **⋯** → **Redeploy**) and update the address in Claude.
 - **"Reddit rejected the app credentials":** re-check your client ID, secret and user agent in Vercel (*your project → Settings → Environment Variables*), then redeploy. Also make sure your Reddit app is still active and registered.
 - **"Reddit rate limit reached":** Reddit allows about 100 requests a minute. Wait a minute and try again.
@@ -86,9 +90,17 @@ Even with these, Claude sometimes skips Reddit when web search seems enough, or 
 
 ## Privacy and safety
 
-- Your copy runs in your own Vercel account. It only answers at your private address, and every other address returns "not found".
+- Your copy runs in your own Vercel account. Claude can only use it at your private address. Your app's main address shows the setup page (✅/❌ only, never your settings, hidden from search engines), and every other address returns "not found".
 - It reads public Reddit posts and comments when Claude asks. It keeps nothing, and it never sees your Claude conversations beyond the searches Claude sends it.
 - If you think your address leaked, change `MCP_PATH_SECRET` in Vercel, redeploy, and update the address in Claude. The old address stops working immediately.
+
+## Questions
+
+**Does it cost anything?** No. Claude uses your normal plan's limits (Reddit results take some room in the conversation, so heavy use reaches your limit a bit sooner). Vercel's free plan and Reddit's API are free for personal use.
+
+**Can I share my connector with someone?** They'd only need your connector address, not your Reddit details. Your Reddit app is for personal use, so keep it to people close to you; everyone else should set up their own copy. To cut off access, change your password in Vercel, redeploy, and send the new address only to the people who should still have it.
+
+**Something went wrong. What should I send when reporting it?** What you asked, what Claude showed (a screenshot helps), and roughly when. On Vercel's free plan, logs are kept for about an hour, so check them soon (Vercel → your project → **Logs**). Upthread logs one line per tool call with the outcome and timing, never your questions or Reddit content.
 
 ## Reddit's rules
 
@@ -99,13 +111,13 @@ Upthread for Reddit is not affiliated with or endorsed by Reddit, Inc. It uses R
 
 ### Tools
 
-**`search_reddit_opinions_reviews`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `top` · `new` · `comments`), `time_range` (`hour` … `all`), `limit` (1–25, default 15). Returns posts with score, upvote ratio, comment count, date, subreddit and excerpt, plus a per-subreddit summary and search tips.
+**`search_reddit_opinions_reviews`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `new`), `time_range` (`hour` … `all`), `limit` (1–25, default 15). Returns posts with score, upvote ratio, comment count, date, subreddit and excerpt, plus a per-subreddit summary and search tips.
 
 **`read_reddit_threads`**: `threads` (1–5 post IDs or Reddit URLs, including share links and comment permalinks), `comment_sort` (`best` · `top` · `controversial` · `new` · `qa`). Returns each post and up to 20 top-level comments with replies three levels deep, trimmed, with `(OP)`/`(mod)` markers and no usernames.
 
 ### How the access gate works
 
-The MCP endpoint lives only at `/mcp/<MCP_PATH_SECRET>`, compared in constant time. Every other path, including `/mcp` and `/.well-known/*`, returns a plain 404 and never a 401, because claude.ai custom connectors can't send auth headers and a 401 makes claude.ai attempt OAuth. If the secret is missing or shorter than 32 characters, the server answers nothing. Logs record error types only, never secrets, paths or Reddit content.
+The MCP endpoint lives only at `/mcp/<MCP_PATH_SECRET>`, compared in constant time. Every other path, including `/mcp` and `/.well-known/*`, returns a plain 404 and never a 401, because claude.ai custom connectors can't send auth headers and a 401 makes claude.ai attempt OAuth. If the secret is missing or shorter than 32 characters, the MCP endpoint answers nothing. The site root serves a setup page that reports configuration states (never values) and is marked noindex. Logs record error types only, never secrets, paths or Reddit content.
 
 ### Other clients
 

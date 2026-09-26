@@ -398,3 +398,18 @@ The launch happens after rollout (§11), once the owner has used Upthread in cla
 - Focusing on a specific comment when a permalink points to one.
 - Moving to Reddit's Developer Platform if the Data API is retired.
 - An optional web-search tool (for example the Brave or Exa API) for clients that have no web search of their own. It stays off unless its API key is set.
+
+## 14. v1.1 changes (2026-09-26)
+
+Based on live testing in claude.ai (web and desktop), a retrieval probe, and a self-audit:
+
+- **No web-search route to Reddit.** Claude's web search in claude.ai returns almost no reddit.com pages (Reddit blocks most non-Google crawlers), so all `site:reddit.com` advice was removed from tool text, results, the skill and the README. `read_reddit_threads` still reads links users share.
+- **Result notes are information, not instructions.** Instructions inside tool results can stall Claude (a "run your web search" line did when web search was off) and invite distrust. The notes now describe what works instead.
+- **Short queries.** Probe: a 3-word query found 9/10 relevant posts vs 2/10 for Claude's long query. The description and the `query` parameter now ask for 2–4 key words.
+- **Sorts limited to `relevance` and `new`.** `top` and `comments` returned mostly unrelated viral posts (5/10 and 0/10).
+- **Community searches** are suggested in the notes as an addition to the general search (probe: 6–10/10 relevant within a community).
+- **Usernames inside text** (`u/name`) are redacted.
+- **One log line per tool call** (tool, outcome, counts, error type, duration; never inputs or content). Error class names are fixed strings so logs survive minification.
+- **Setup check page** at the site root: configuration states only, never values; noindex. The MCP endpoint and all other paths behave as before.
+- **Deferred review items fixed:** gallery links, positional thread-ID parsing, rate budget after a 429 and across batches, share-link lookups counted, 404 for every HTTP method on a wrong secret.
+- **Evals** are planned in `docs/evals/README.md`; automatic query shortening, automatic community searches and optional web-search discovery wait on them.
