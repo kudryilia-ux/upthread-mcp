@@ -38,3 +38,14 @@ describe("Reddit errors", () => {
     expect(new RateLimitedError(12.1).resetSeconds).toBe(13);
   });
 });
+
+describe("error names survive minification (v1.1)", () => {
+  it("each class has a fixed, readable name for logs", () => {
+    expect([
+      new CredentialsError().name, new RateLimitedError(1).name, new UpstreamError("x").name,
+      new ThreadUnavailableError("a").name, new InvalidThreadRefError("a").name, new ShareLinkError("a").name,
+    ]).toEqual(["CredentialsError", "RateLimitedError", "UpstreamError", "ThreadUnavailableError", "InvalidThreadRefError", "ShareLinkError"]);
+    const src = require("node:fs").readFileSync("lib/reddit/errors.ts", "utf8") as string;
+    expect(src).not.toContain("new.target.name");
+  });
+});
