@@ -15,3 +15,7 @@ export const collapse = (text: string) => text.replace(/\s+/g, " ").trim();
 export function trimText(text: string, max: number, suffix = "…[trimmed]"): string {
   return text.length <= max ? text : text.slice(0, max).trimEnd() + suffix;
 }
+
+/** Hides Reddit usernames mentioned inside text (we never print authors either). */
+export const redactUsernames = (text: string) =>
+  text.replace(/(^|[^A-Za-z0-9_])\/?u\/[A-Za-z0-9_-]{3,20}/g, "$1u/[user]");

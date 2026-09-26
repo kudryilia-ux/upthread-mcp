@@ -19,3 +19,15 @@ describe("common formatters", () => {
     expect(trimText("ab  cdefgh", 3, "…")).toBe("ab…");
   });
 });
+
+describe("redactUsernames (v1.1)", () => {
+  it("replaces u/name and /u/name mentions, keeping surrounding text", async () => {
+    const { redactUsernames } = await import("@/lib/format/common");
+    expect(redactUsernames("thanks u/Fjurious and /u/angry_moose-125!")).toBe("thanks u/[user] and u/[user]!");
+    expect(redactUsernames("see reddit.com/u/someone/posts")).toBe("see reddit.com/u/[user]/posts");
+  });
+  it("leaves subreddits and ordinary words alone", async () => {
+    const { redactUsernames } = await import("@/lib/format/common");
+    expect(redactUsernames("r/onebag, menu/ubiquitous, a u/ b")).toBe("r/onebag, menu/ubiquitous, a u/ b");
+  });
+});

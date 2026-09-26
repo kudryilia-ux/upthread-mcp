@@ -92,3 +92,11 @@ describe("formatThread final-review fixes", () => {
     expect(out).toContain("Post (OP): Is this mold on my wall?");
   });
 });
+
+describe("formatThread hides usernames mentioned in text (v1.1)", () => {
+  it("redacts u/ mentions in post bodies and comments", () => {
+    const out = formatThread({ post: post({ selftext: "Credit to u/helper_one." }), comments: [c({ body: "u/Fjurious is right" })] }, "best");
+    expect(out).not.toMatch(/helper_one|Fjurious/);
+    expect(out).toContain("u/[user]");
+  });
+});

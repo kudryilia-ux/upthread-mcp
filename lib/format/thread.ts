@@ -1,5 +1,5 @@
 import type { Comment, CommentSort, Thread } from "../reddit/types";
-import { collapse, formatDate, formatRatio, formatScore, trimText } from "./common";
+import { collapse, formatDate, formatRatio, formatScore, redactUsernames, trimText } from "./common";
 
 export const THREAD_LIMITS = { postChars: 4000, commentChars: 600, topLevel: 20, depth2: 3, depth3: 2 } as const;
 const PER_DEPTH = [THREAD_LIMITS.topLevel, THREAD_LIMITS.depth2, THREAD_LIMITS.depth3];
@@ -24,7 +24,7 @@ function renderComments(comments: Comment[], depth: number, out: string[]) {
     const indent = "  ".repeat(depth) + (depth > 0 ? "↳ " : "");
     const score = c.scoreHidden ? "[score hidden]" : `[▲${formatScore(c.score)}]`;
     const markers = [c.isOp ? "(OP)" : "", c.isMod ? "(mod)" : ""].filter(Boolean).join(" ");
-    const body = trimText(collapse(c.body), THREAD_LIMITS.commentChars);
+    const body = trimText(collapse(redactUsernames(c.body)), THREAD_LIMITS.commentChars);
     const date = depth === 0 ? ` [${formatDate(c.createdUtc)}]` : "";
     out.push(`${indent}${score} ${markers ? markers + " " : ""}${body}${date}`);
     renderComments(c.replies, depth + 1, out);
@@ -44,7 +44,7 @@ export function formatThread({ post, comments }: Thread, commentSort: CommentSor
     ].join(" · "),
   ];
   if (!post.isSelf) lines.push(`Link: ${post.url}`);
-  const body = post.selftext.replace(/\n{3,}/g, "\n\n").trim();
+  const body = redactUsernames(post.selftext).replace(/\n{3,}/g, "\n\n").trim();
   if (post.isSelf || body) {
     lines.push(`Post (OP): ${body ? trimText(body, THREAD_LIMITS.postChars) : "(no text)"}`);
   }

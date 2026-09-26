@@ -98,3 +98,10 @@ describe("formatSearchResults notes are information, not instructions (v1.1)", (
     expect(notes).toMatch(/in addition to/i);
   });
 });
+
+describe("formatSearchResults hides usernames mentioned in excerpts (v1.1)", () => {
+  it("redacts u/ mentions", () => {
+    const out = formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post({ selftext: "Asking u/SomeUser123 about this" })]);
+    expect(out).not.toContain("SomeUser123");
+  });
+});
