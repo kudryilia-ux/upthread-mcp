@@ -105,3 +105,9 @@ describe("formatSearchResults hides usernames mentioned in excerpts (v1.1)", () 
     expect(out).not.toContain("SomeUser123");
   });
 });
+
+describe("formatSearchResults redacts titles (v1.1 review)", () => {
+  it("redacts usernames in titles", () => {
+    expect(formatSearchResults("q", { sort: "relevance", timeRange: "all" }, [post({ title: "Thanks u/HelpfulPerson" })])).not.toContain("HelpfulPerson");
+  });
+});

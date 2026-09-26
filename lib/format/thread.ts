@@ -34,7 +34,7 @@ function renderComments(comments: Comment[], depth: number, out: string[]) {
 export function formatThread({ post, comments }: Thread, commentSort: CommentSort): string {
   const ratio = formatRatio(post.upvoteRatio);
   const lines = [
-    `=== [${post.id}] ${post.over18 ? "[NSFW] " : ""}${post.title}`,
+    `=== [${post.id}] ${post.over18 ? "[NSFW] " : ""}${redactUsernames(post.title)}`,
     [
       `r/${post.subreddit}`,
       `${formatScore(post.score)} points${ratio ? ` (${ratio})` : ""}`,
@@ -43,7 +43,7 @@ export function formatThread({ post, comments }: Thread, commentSort: CommentSor
       post.permalink,
     ].join(" · "),
   ];
-  if (!post.isSelf) lines.push(`Link: ${post.url}`);
+  if (!post.isSelf) lines.push(`Link: ${redactUsernames(post.url)}`);
   const body = redactUsernames(post.selftext).replace(/\n{3,}/g, "\n\n").trim();
   if (post.isSelf || body) {
     lines.push(`Post (OP): ${body ? trimText(body, THREAD_LIMITS.postChars) : "(no text)"}`);

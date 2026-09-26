@@ -31,3 +31,15 @@ describe("redactUsernames (v1.1)", () => {
     expect(redactUsernames("r/onebag, menu/ubiquitous, a u/ b")).toBe("r/onebag, menu/ubiquitous, a u/ b");
   });
 });
+
+describe("redactUsernames: review cases (v1.1)", () => {
+  it.each([
+    ["thanks u/foo\\_bar!", "thanks u/[user]!"],
+    ["see reddit.com/user/Foo_Bar/ now", "see reddit.com/user/[user]/ now"],
+    ["[profile](https://www.reddit.com/user/some-one)", "[profile](https://www.reddit.com/user/[user])"],
+    ["ask U/Name please", "ask u/[user] please"],
+  ])("%s", async (input, expected) => {
+    const { redactUsernames } = await import("@/lib/format/common");
+    expect(redactUsernames(input)).toBe(expected);
+  });
+});

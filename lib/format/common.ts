@@ -17,5 +17,7 @@ export function trimText(text: string, max: number, suffix = "…[trimmed]"): st
 }
 
 /** Hides Reddit usernames mentioned inside text (we never print authors either). */
+// Covers u/name, /u/name, U/name, /user/name (profile links) and markdown-escaped underscores (u/foo\_bar).
 export const redactUsernames = (text: string) =>
-  text.replace(/(^|[^A-Za-z0-9_])\/?u\/[A-Za-z0-9_-]{3,20}/g, "$1u/[user]");
+  text.replace(/(^|[^A-Za-z0-9_])\/?(u|user)\/[A-Za-z0-9_\\-]{3,40}/gi, (_m, pre: string, kind: string) =>
+    `${pre}${kind.toLowerCase() === "user" ? "user" : "u"}/[user]`);

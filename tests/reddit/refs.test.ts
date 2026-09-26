@@ -71,3 +71,12 @@ describe("parseThreadRef v1.1 fixes", () => {
     expect(parseThreadRef(input)).toEqual({ kind: "id", id: expected });
   });
 });
+
+describe("parseThreadRef: profile posts (v1.1 review)", () => {
+  it.each([
+    ["https://www.reddit.com/user/someone/comments/1abc2de/title/", "1abc2de"],
+    ["https://www.reddit.com/u/someone/comments/1abc2de/", "1abc2de"],
+  ])("%s -> %s", (input, expected) => {
+    expect(parseThreadRef(input)).toEqual({ kind: "id", id: expected });
+  });
+});

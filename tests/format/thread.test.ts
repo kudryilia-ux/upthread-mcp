@@ -100,3 +100,10 @@ describe("formatThread hides usernames mentioned in text (v1.1)", () => {
     expect(out).toContain("u/[user]");
   });
 });
+
+describe("formatThread redacts titles and link URLs too (v1.1 review)", () => {
+  it("redacts usernames in the title and the link", () => {
+    const out = formatThread({ post: post({ title: "PSA from u/SomeMod", isSelf: false, selftext: "", url: "https://www.reddit.com/user/SomeMod/" }), comments: [] }, "best");
+    expect(out).not.toContain("SomeMod");
+  });
+});

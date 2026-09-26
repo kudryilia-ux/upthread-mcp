@@ -36,7 +36,7 @@ function entry(p: PostSummary, i: number): string {
   meta.push(`${formatScore(p.score)} points${ratio ? ` (${ratio})` : ""}`);
   meta.push(`${p.numComments} comments`, formatDate(p.createdUtc));
   if (!p.isSelf && p.domain) meta.push(`link: ${p.domain}`);
-  const lines = [`${i + 1}. [${p.id}] ${p.over18 ? "[NSFW] " : ""}${p.title}`, `   ${meta.join(" · ")}`];
+  const lines = [`${i + 1}. [${p.id}] ${p.over18 ? "[NSFW] " : ""}${redactUsernames(p.title)}`, `   ${meta.join(" · ")}`];
   const excerpt = collapse(redactUsernames(p.selftext));
   if (excerpt) lines.push(`   "${trimText(excerpt, EXCERPT_CHARS, "…")}"`);
   return lines.join("\n");
