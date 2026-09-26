@@ -111,13 +111,13 @@ Upthread for Reddit is not affiliated with or endorsed by Reddit, Inc. It uses R
 
 ### Tools
 
-**`search_reddit_opinions_reviews`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `new`), `time_range` (`hour` … `all`), `limit` (1–25, default 15). Returns posts with score, upvote ratio, comment count, date, subreddit and excerpt, plus a per-subreddit summary and search tips.
+**`search_reddit_opinions_reviews`**: `query` (Reddit operators allowed: `title:`, `subreddit:`, `OR`, …), `sort` (`relevance` · `new`), `time_range` (`hour` … `all`), `limit` (1–25, default 15). Returns posts with score, upvote ratio, comment count, date, subreddit and excerpt, plus a per-subreddit summary and search notes.
 
 **`read_reddit_threads`**: `threads` (1–5 post IDs or Reddit URLs, including share links and comment permalinks), `comment_sort` (`best` · `top` · `controversial` · `new` · `qa`). Returns each post and up to 20 top-level comments with replies three levels deep, trimmed, with `(OP)`/`(mod)` markers and no usernames.
 
 ### How the access gate works
 
-The MCP endpoint lives only at `/mcp/<MCP_PATH_SECRET>`, compared in constant time. Every other path, including `/mcp` and `/.well-known/*`, returns a plain 404 and never a 401, because claude.ai custom connectors can't send auth headers and a 401 makes claude.ai attempt OAuth. If the secret is missing or shorter than 32 characters, the MCP endpoint answers nothing. The site root serves a setup page that reports configuration states (never values) and is marked noindex. Logs record error types only, never secrets, paths or Reddit content.
+The MCP endpoint lives only at `/mcp/<MCP_PATH_SECRET>`, compared in constant time. Every other path, including `/mcp` and `/.well-known/*`, returns a plain 404 and never a 401, because claude.ai custom connectors can't send auth headers and a 401 makes claude.ai attempt OAuth. If the secret is missing or shorter than 32 characters, the MCP endpoint answers nothing. The site root serves a setup page that reports configuration states (never values) and is marked noindex. Logs record one line per tool call (outcome, counts, error type, timing), never secrets, paths, queries or Reddit content.
 
 ### Other clients
 

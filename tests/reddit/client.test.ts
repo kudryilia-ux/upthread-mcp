@@ -212,3 +212,43 @@ describe("RedditClient v1.1 rate-limit and refresh fixes", () => {
     await expect(client.get("/a")).resolves.toEqual({ ok: 1 });
   });
 });
+
+describe("RedditClient v1.1 review fixes", () => {
+  it("ignores rate-limit headers from the anonymous www.reddit.com share-link fallback", async () => {
+    const loc = "https://www.reddit.com/r/x/comments/1abc2de/";
+    const { client } = setup([
+      token(),
+      json({}, 200, { "x-ratelimit-remaining": "50", "x-ratelimit-reset": "300" }), // OAuth API call
+      json({}, 404), // OAuth share attempt: no redirect
+      new Response(null, { status: 302, headers: { location: loc, "x-ratelimit-remaining": "0", "x-ratelimit-reset": "600" } }),
+      json({ ok: 1 }),
+    ]);
+    await client.get("/a");
+    await expect(client.resolveShareLink("/r/x/s/Ab")).resolves.toBe(loc);
+    await expect(client.get("/b")).resolves.toEqual({ ok: 1 });
+  });
+
+  it("a 429 from the token endpoint also blocks the next call", async () => {
+    const { client, calls } = setup([json({}, 429, { "x-ratelimit-reset": "30" })]);
+    await expect(client.get("/a")).rejects.toBeInstanceOf(RateLimitedError);
+    await expect(client.get("/b")).rejects.toBeInstanceOf(RateLimitedError);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("treats a non-numeric reset header as unknown instead of disabling the budget check", async () => {
+    const { client, calls } = setup([token(), json({}, 200, { "x-ratelimit-remaining": "1", "x-ratelimit-reset": "soon" })]);
+    await client.get("/a");
+    await expect(client.get("/b")).rejects.toBeInstanceOf(RateLimitedError);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("checkCredentials caches a failed login for 60s so the setup page can't hammer Reddit", async () => {
+    const { client, calls, clock } = setup([json({}, 401), json({}, 401)]);
+    expect(await client.checkCredentials()).toBe("rejected");
+    expect(await client.checkCredentials()).toBe("rejected");
+    expect(calls).toHaveLength(1);
+    clock.t += 61_000;
+    expect(await client.checkCredentials()).toBe("rejected");
+    expect(calls).toHaveLength(2);
+  });
+});

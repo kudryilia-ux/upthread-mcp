@@ -21,6 +21,7 @@ export class RedditClient {
   private pendingToken: Promise<string> | null = null;
   private remaining: number | null = null;
   private resetAt = 0;
+  private lastFailedCheck: { result: "rejected" | "unreachable"; at: number } | null = null;
 
   constructor(opts: RedditClientOptions) {
     this.opts = {
@@ -79,11 +80,18 @@ export class RedditClient {
 
   /** For the setup page: can we log in to Reddit with these credentials? */
   async checkCredentials(): Promise<"ok" | "rejected" | "unreachable"> {
+    // A failed login is remembered for a minute, so reloading the public setup page can't
+    // send Reddit a stream of failed logins. Successes reuse the cached token anyway.
+    const now = this.opts.now();
+    if (this.lastFailedCheck && now - this.lastFailedCheck.at < 60_000) return this.lastFailedCheck.result;
     try {
       await this.getToken();
+      this.lastFailedCheck = null;
       return "ok";
     } catch (e) {
-      return e instanceof CredentialsError ? "rejected" : "unreachable";
+      const result = e instanceof CredentialsError ? "rejected" : "unreachable";
+      this.lastFailedCheck = { result, at: now };
+      return result;
     }
   }
 
@@ -94,10 +102,13 @@ export class RedditClient {
       [API_ORIGIN + pathname, bearer],
       ["https://www.reddit.com" + pathname, { "user-agent": this.opts.userAgent }],
     ];
-    for (const [url, headers] of attempts) {
-      this.spendBudget();
+    for (const [i, [url, headers]] of attempts.entries()) {
+      // Only the OAuth attempt counts against (and reports) our API budget; the www.reddit.com
+      // fallback is anonymous and its headers describe a different, per-IP limit.
+      const oauth = i === 0;
+      if (oauth) this.spendBudget();
       const res = await this.send(url, { headers, redirect: "manual" });
-      this.recordRateLimit(res.headers);
+      if (oauth) this.recordRateLimit(res.headers);
       const location = res.headers.get("location");
       if (res.status >= 300 && res.status < 400 && location) return location;
     }
@@ -114,15 +125,20 @@ export class RedditClient {
   }
 
   private recordRateLimit(headers: Headers) {
-    const remaining = headers.get("x-ratelimit-remaining");
+    const remaining = Number(headers.get("x-ratelimit-remaining") ?? NaN);
     const reset = this.headerSeconds(headers);
-    if (remaining !== null) this.remaining = Number(remaining);
-    if (reset !== null) this.resetAt = this.opts.now() + reset * 1000;
+    if (Number.isFinite(remaining)) {
+      this.remaining = remaining;
+      // Unknown reset: assume Reddit's window restarts within a minute rather than disabling the check.
+      this.resetAt = this.opts.now() + (reset ?? 60) * 1000;
+    } else if (reset !== null) {
+      this.resetAt = this.opts.now() + reset * 1000;
+    }
   }
 
   private headerSeconds(headers: Headers): number | null {
-    const v = headers.get("x-ratelimit-reset");
-    return v === null ? null : Number(v);
+    const v = Number(headers.get("x-ratelimit-reset") ?? NaN);
+    return Number.isFinite(v) ? v : null;
   }
 
   private getToken(): Promise<string> {
@@ -146,7 +162,12 @@ export class RedditClient {
       },
       body: "grant_type=client_credentials",
     });
-    if (res.status === 429) throw new RateLimitedError(this.headerSeconds(res.headers) ?? 60);
+    if (res.status === 429) {
+      const reset = this.headerSeconds(res.headers) ?? 60;
+      this.remaining = 0;
+      this.resetAt = this.opts.now() + reset * 1000;
+      throw new RateLimitedError(reset);
+    }
     if (res.status >= 500) throw new UpstreamError(`HTTP ${res.status}`);
     const body = (await res.json().catch(() => ({}))) as { access_token?: string; expires_in?: number };
     if (!res.ok || !body.access_token) throw new CredentialsError();

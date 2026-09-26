@@ -61,3 +61,12 @@ describe("gated MCP route: every method (v1.1)", () => {
     }
   });
 });
+
+describe("gated MCP route: OPTIONS (v1.1 review)", () => {
+  it("returns 404 for OPTIONS with a wrong secret", async () => {
+    const route = (await import("@/app/mcp/[secret]/route")) as Record<string, unknown>;
+    const handler = route.OPTIONS as typeof POST | undefined;
+    expect(handler).toBeTypeOf("function");
+    expect((await handler!(new Request("http://localhost/mcp/nope", { method: "OPTIONS" }), ctx("nope"))).status).toBe(404);
+  });
+});

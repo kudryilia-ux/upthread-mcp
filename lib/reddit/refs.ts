@@ -29,7 +29,11 @@ export function parseThreadRef(input: string): ParsedRef {
     if (host === "reddit.com" || host.endsWith(".reddit.com")) {
       // Positional, so a subreddit literally named "comments" can't confuse it.
       const candidate = (
-        segs[0] === "comments" || segs[0] === "gallery" ? segs[1] : segs[0] === "r" && segs[2] === "comments" ? segs[3] : undefined
+        segs[0] === "comments" || segs[0] === "gallery"
+          ? segs[1]
+          : ["r", "u", "user"].includes(segs[0]) && segs[2] === "comments"
+            ? segs[3]
+            : undefined
       )?.toLowerCase();
       if (candidate && BASE36.test(candidate)) return { kind: "id", id: candidate };
       if (segs.length === 4 && segs[0] === "r" && segs[2] === "s") {
