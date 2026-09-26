@@ -50,8 +50,8 @@ describe("read_threads", () => {
     expect(res.isError).toBe(true);
   });
 
-  it("description mentions web search links and controversial sort, and stays neutral", () => {
-    expect(READ_THREADS_DESCRIPTION).toMatch(/web search/i);
+  it("description mentions user-shared links and controversial sort, and stays neutral", () => {
+    expect(READ_THREADS_DESCRIPTION).toMatch(/links the user shares/i);
     expect(READ_THREADS_DESCRIPTION).toMatch(/controversial/);
     expect(READ_THREADS_DESCRIPTION).not.toMatch(/consensus/i);
     expect(READ_THREADS_DESCRIPTION.length).toBeLessThanOrEqual(500);

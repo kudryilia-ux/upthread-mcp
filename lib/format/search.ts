@@ -4,23 +4,20 @@ import { collapse, formatDate, formatRatio, formatScore, trimText } from "./comm
 const EXCERPT_CHARS = 200;
 const TOP_SUBREDDITS = 4;
 
-const COMBINE =
-  "Also run your web search on this question and combine both sources: Reddit shows people's experiences and " +
-  "opinions, the web adds facts, specs and expert reviews.";
+// Notes are information for Claude, not instructions: Claude is rightly wary of orders inside tool results.
+const SHORT_QUERIES =
+  "Reddit search works best with 2–4 key words (e.g. walking shoes Europe); long queries with numbers or details " +
+  "mostly return unrelated posts. If a name is ambiguous, adding a brand or model, or OR-ing variants, helps.";
 
-const TIPS =
-  'Tips: read the relevant threads with read_reddit_threads. To refine, use short names, "X vs Y" or nicknames; ' +
-  'if a name is ambiguous, add a brand or full model or OR the variants. Operators: title:, subreddit: (only in ' +
-  "addition to a general search), OR, NOT; exact quotes are unreliable. FAQ and megathreads often answer best. " +
-  "Search matches posts, not comments: for details in comments, web-search site:reddit.com and read those links.";
+const NOTES =
+  `Search notes: ${SHORT_QUERIES} A subreddit:name search within the communities above often finds more relevant ` +
+  "threads, in addition to this general search. FAQ and megathreads often answer best. The experiences are mostly " +
+  "in the comments, which read_reddit_threads returns.";
 
-const HINTS = [
-  "Next steps:",
-  '- Rephrase the way Redditors title posts: short names, "X vs Y", nicknames.',
-  "- If a name is ambiguous, add a distinguishing word (brand, full model) or OR the variants.",
-  "- Widen time_range.",
-  "- Use web search with site:reddit.com and pass thread URLs to read_reddit_threads.",
-].join("\n");
+const THIN_NOTES =
+  `Search notes: ${SHORT_QUERIES} Other phrasings, nicknames or a wider time_range may find more, as can a ` +
+  "subreddit:name search within a relevant community, in addition to a general search. Any relevant threads " +
+  "here can be read in full with read_reddit_threads.";
 
 function subredditLine(posts: PostSummary[]): string {
   const counts = new Map<string, number>();
@@ -50,7 +47,7 @@ export function formatSearchResults(
   o: { sort: SearchSort; timeRange: TimeRange },
   posts: PostSummary[],
 ): string {
-  if (posts.length === 0) return `No results for "${query}".\n\n${HINTS}\n\n${COMBINE}`;
+  if (posts.length === 0) return `No results for "${query}".\n\n${THIN_NOTES}`;
   const time = o.timeRange === "all" ? "all time" : `past ${o.timeRange}`;
   const parts = [
     `Search "${query}" · ${o.sort} · ${time} · ${posts.length} results`,
@@ -58,6 +55,6 @@ export function formatSearchResults(
     "",
     posts.map(entry).join("\n"),
   ];
-  parts.push("", posts.length <= 2 ? `Few results. ${HINTS}` : TIPS, "", COMBINE);
+  parts.push("", posts.length <= 2 ? `Few results. ${THIN_NOTES}` : NOTES);
   return parts.join("\n");
 }

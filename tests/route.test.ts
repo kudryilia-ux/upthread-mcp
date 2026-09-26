@@ -39,7 +39,7 @@ describe("gated MCP route", () => {
     expect(tools.map((t) => t.name).sort()).toEqual(["read_reddit_threads", "search_reddit_opinions_reviews"]);
     for (const t of tools) expect(t.title ?? t.annotations?.title).toMatch(/Reddit/);
     expect(tools.every((t) => t.annotations?.readOnlyHint === true)).toBe(true);
-    expect(client.getInstructions()).toMatch(/site:reddit\.com/);
+    expect(client.getInstructions()).toMatch(/read_reddit_threads/);
 
     // Without Reddit credentials the tool reports the credentials message instead of crashing.
     vi.spyOn(console, "error").mockImplementation(() => {});

@@ -24,8 +24,17 @@ describe("tool triggering", () => {
     for (const w of TRIGGER_WORDS) expect(first).toMatch(w);
   });
 
-  it("read_threads mentions Reddit links from web search in its first paragraph", () => {
-    expect(READ_THREADS_DESCRIPTION.split("\n\n")[0]).toMatch(/web search/i);
+  it("read_threads accepts links the user shares, and nothing tells Claude to find Reddit via web search", () => {
+    expect(READ_THREADS_DESCRIPTION.split("\n\n")[0]).toMatch(/links? the user shares/i);
+    for (const t of [SEARCH_REDDIT_DESCRIPTION, READ_THREADS_DESCRIPTION, SERVER_INSTRUCTIONS]) {
+      expect(t).not.toMatch(/site:reddit\.com/);
+      expect(t).not.toMatch(/web search (finds|to find)/i);
+    }
+  });
+
+  it("the skill file doesn't send Claude to site:reddit.com either", async () => {
+    const { readFileSync } = await import("node:fs");
+    expect(readFileSync("skill/upthread/SKILL.md", "utf8")).not.toMatch(/site:reddit\.com/);
   });
 
   it("stays neutral: no consensus framing", () => {
