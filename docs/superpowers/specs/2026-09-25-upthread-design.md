@@ -32,8 +32,8 @@ The main client is claude.ai chat, using an authless custom connector. The serve
 - **Deploys:** manual `vercel --prod`. The Vercel plugin stays disabled.
 - **claude.ai connectors can't send custom headers.** OAuth discovery paths (`/.well-known/*`) must return **404, never 401**. A 401 makes claude.ai attempt OAuth, which fails.
 - **Credentials:**
-  - They live in 1Password. `~/.config/reddit-mcp/.env.op` holds `op://` references for `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT` and `MCP_PATH_SECRET`.
-  - Local commands that need them run through `op run --env-file ~/.config/reddit-mcp/.env.op -- …`, and the owner runs those commands.
+  - They live in 1Password. A local references file holds `op://` references for `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT` and `MCP_PATH_SECRET`.
+  - Local commands that need them run through `op run --env-file <refs-file> -- …`, and the owner runs those commands.
   - Production values are set in Vercel's environment settings by the owner.
 - **The repo will be public.** A gitleaks pre-commit hook is installed. If it blocks a commit, stop and report it; never bypass it.
 - **Reddit API facts** (researched 2026-09-25 and confirmed by a live probe the same day):

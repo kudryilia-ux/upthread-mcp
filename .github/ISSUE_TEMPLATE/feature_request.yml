@@ -1,0 +1,16 @@
+name: Idea or improvement
+description: Suggest a change to Upthread
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like Upthread to do?
+      description: The question or situation where it falls short today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Ideas for how
+      description: Optional. Note that Upthread stays read-only and stores nothing.
