@@ -1,0 +1,34 @@
+name: Something isn't working
+description: Setup problems, errors, or Claude not using Upthread as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        First open your app's address in a browser: the setup page shows which setting is wrong.
+        **Never paste your connector address, `MCP_PATH_SECRET` or Reddit credentials here.**
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you asked Claude, what it did, and what you expected. Screenshots help.
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: Where
+      options: [claude.ai (web), Claude desktop app, Claude mobile app, Claude Code, Other MCP client]
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup page
+      description: Which items show ✅ or ❌ on your app's setup page?
+  - type: textarea
+    id: logs
+    attributes:
+      label: Vercel logs (optional)
+      description: The matching lines from Vercel → your project → Logs. They hold outcomes and timings, not queries or secrets.
+      render: text

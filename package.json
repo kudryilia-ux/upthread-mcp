@@ -2,6 +2,25 @@
   "name": "upthread-mcp",
   "version": "0.1.0",
   "description": "Upthread for Reddit: an MCP server that lets Claude search Reddit and read threads.",
+  "license": "MIT",
+  "homepage": "https://github.com/kudryilia-ux/upthread-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kudryilia-ux/upthread-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kudryilia-ux/upthread-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude",
+    "reddit",
+    "remote-mcp",
+    "nextjs",
+    "vercel"
+  ],
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -1,5 +1,5 @@
 // Live smoke test: node scripts/test-client.mjs http://localhost:3000
-// Reads MCP_PATH_SECRET from env (run via: op run --env-file ~/.config/reddit-mcp/.env.op -- ...).
+// Reads MCP_PATH_SECRET from the environment.
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 
 const base = process.argv.slice(2).find((a) => a !== "--") ?? "http://localhost:3000";

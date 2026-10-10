@@ -60,7 +60,7 @@ There's no slash at the end. Keep this address private; anyone who has it can us
 
 ### 5. Add it to Claude
 1. In [claude.ai](https://claude.ai), click your name (bottom left) → **Settings** → **Connectors** → **Add custom connector**.
-2. **Name:** `Upthread - Reddit opinions & reviews`
+2. **Name:** `Upthread - Reddit opinions & reviews`. Use this exact name: it becomes the start of the tool names Claude sees, and those names are most of what Claude goes on when deciding whether to check Reddit.
 3. **URL:** your connector address from step 4
 4. Click **Add**. You should see two tools listed: `search_reddit_opinions_reviews` and `read_reddit_threads`.
 
@@ -69,12 +69,13 @@ Start a new chat and ask: *"Search Reddit for how Sony XM5 headphones hold up af
 
 ## Getting Claude to use Reddit on its own
 
-Mentioning "Reddit" in your question always works. Without it, Claude decides for itself whether to check Reddit, and by default it often doesn't, because it keeps connectors on standby until a question clearly calls for them. Any of these makes it more automatic (most reliable first):
+Mentioning "Reddit" in your question always works. Without it, Claude decides for itself whether to check Reddit, and by default it often doesn't. Until it decides to use a connector, Claude sees only the connector's tool names, not their descriptions, so on questions it thinks it can answer from memory it usually doesn't look further. Either of these makes it more automatic:
 
-1. **Load tools at the start of a chat.** Click **+** (next to the message box) → **Connectors** → **Tool access** → **Tools already loaded**. Claude then knows about Upthread from your first message. Turn off connectors you don't need in that chat to keep it fast.
-2. **Install the Upthread skill** (one-time). Download [`upthread-skill.zip`](https://github.com/kudryilia-ux/upthread-mcp/raw/main/skill/upthread-skill.zip), then in claude.ai open **Customize → Skills** and upload the file (on older layouts: *Settings → Capabilities → Skills → Upload skill*). Skills need code execution turned on in your settings.
-3. **Add an instruction for Claude** (one-time). Click your initials (bottom left) → **Settings** → **General** → **Instructions for Claude** (called "personal preferences" on older layouts), and paste:
+1. **Add an instruction for Claude** (one-time). Click your initials (bottom left) → **Settings** → **General** → **Instructions for Claude** (called "personal preferences" on older layouts), and paste:
    > For questions about how people experience or view something (products, media, places, advice, troubleshooting), also check Reddit with the Upthread tools. Whenever you use Reddit, also run a web search and combine both in your answer.
+2. **Install the Upthread skill** (one-time). Download [`upthread-skill.zip`](https://github.com/kudryilia-ux/upthread-mcp/raw/main/skill/upthread-skill.zip), then in claude.ai open **Customize → Skills** and upload the file (on older layouts: *Settings → Capabilities → Skills → Upload skill*). Skills need code execution turned on in your settings.
+
+The **Tool access** setting (under **+** → **Connectors**) doesn't change this for custom connectors: in our tests Claude saw only the tool names under both options.
 
 Even with these, Claude sometimes skips Reddit when web search seems enough, or skips web search after using Reddit. If you want both for sure, say so, e.g. *"search the web and Reddit, then combine them"*.
 
@@ -141,6 +142,10 @@ MCP_PATH_SECRET=... node scripts/check-deploy.mjs https://<your-app>.vercel.app 
 Generate a secret from the command line with `openssl rand -base64 32 | tr '+/' '-_' | tr -d '='`. Design notes are in [`docs/superpowers/specs`](docs/superpowers/specs).
 
 </details>
+
+## Contributing and security
+
+Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Please report security problems privately, as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
